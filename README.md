@@ -1,7 +1,11 @@
-﻿# Heading
+﻿# Nerdblock website
 
-build HTML: npx @11ty/eleventy
+# some commands
+npm dev: builds and runs 11ty server
+npm run css: builds the css and puts it into the _site folder
 
-to run locally:
-    - build CSS first: npx tailwindcss -i ./src/styles/tailwind.css -o ./_site/styles/tailwind.css --watch
-    - run html: npx @11ty/eleventy --serve
+# to run locally
+    - open terminal
+    - be in frontend folder: cd .\frontend\
+    - build CSS first: npm run css
+    - run html: npm run dev
