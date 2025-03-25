@@ -4,7 +4,8 @@ module.exports = function(eleventyConfig) {
     dir: {
       input: "src",      // Input folder
       includes: "_includes", // Include folder for layouts/partials
-      output: "_site",    // Output folder
+      output: "_site", // Output folder
+      layouts: "_includes/layouts"   
     },
     // Optionally, add a passthrough copy to selectively copy assets
     passthroughFileCopy: true, // This is useful for copying static files like images, CSS, etc.
