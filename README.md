@@ -7,5 +7,6 @@ npm run css: builds the css and puts it into the _site folder
 # to run locally
     - open terminal
     - be in frontend folder: cd .\frontend\
+    - install node modules: npm i
     - build CSS first: npm run css
     - run html: npm run dev
