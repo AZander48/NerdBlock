@@ -9,4 +9,4 @@ npm run css: builds the css and puts it into the _site folder
     - be in frontend folder: cd .\frontend\
     - install node modules: npm i
     - build CSS first: npm run css
-    - run html: npm run dev
+    - run html in a separate terminal: npm run dev
