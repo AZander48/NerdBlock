@@ -1,0 +1,156 @@
+---
+title: Business Reports - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Business Reports</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Make data-driven decisions with comprehensive business analytics
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Key Metrics -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Key Business Metrics</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <div class="text-4xl font-bold text-purple-500 mb-2">20K+</div>
+          <h3 class="text-xl font-semibold mb-2">Active Subscribers</h3>
+          <p class="text-gray-300">Growing customer base</p>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <div class="text-4xl font-bold text-green-500 mb-2">95%</div>
+          <h3 class="text-xl font-semibold mb-2">Customer Satisfaction</h3>
+          <p class="text-gray-300">High retention rate</p>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <div class="text-4xl font-bold text-blue-500 mb-2">3+</div>
+          <h3 class="text-xl font-semibold mb-2">Subscription Types</h3>
+          <p class="text-gray-300">Diverse product offerings</p>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <div class="text-4xl font-bold text-yellow-500 mb-2">Global</div>
+          <h3 class="text-xl font-semibold mb-2">Market Reach</h3>
+          <p class="text-gray-300">International presence</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Report Types -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Report Types</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
+          <h3 class="text-2xl font-bold mb-6">Financial Reports</h3>
+          <ul class="space-y-4">
+            <li class="flex items-start">
+              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <h4 class="font-semibold">Revenue Analysis</h4>
+                <p class="text-gray-300">Track subscription revenue and growth trends</p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <h4 class="font-semibold">Cost Analysis</h4>
+                <p class="text-gray-300">Monitor operational costs and profitability</p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <h4 class="font-semibold">Financial Forecasting</h4>
+                <p class="text-gray-300">Predict future financial performance</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
+          <h3 class="text-2xl font-bold mb-6">Customer Analytics</h3>
+          <ul class="space-y-4">
+            <li class="flex items-start">
+              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <h4 class="font-semibold">Customer Demographics</h4>
+                <p class="text-gray-300">Analyze customer profiles and preferences</p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <h4 class="font-semibold">Subscription Trends</h4>
+                <p class="text-gray-300">Track subscription patterns and churn rates</p>
+              </div>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <h4 class="font-semibold">Customer Feedback</h4>
+                <p class="text-gray-300">Monitor customer satisfaction and reviews</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Report Generation -->
+    <section class="bg-gray-700 rounded-2xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold mb-8 text-center">Report Generation</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Custom Reports</h3>
+          <p class="text-gray-300">Generate tailored reports based on your needs</p>
+        </div>
+
+        <div class="text-center">
+          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Export Options</h3>
+          <p class="text-gray-300">Export reports in various formats</p>
+        </div>
+
+        <div class="text-center">
+          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Scheduled Reports</h3>
+          <p class="text-gray-300">Automated report generation and delivery</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %} 
