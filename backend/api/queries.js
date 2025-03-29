@@ -1,13 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
+console.log(process.env.DB_USER);
 
 // Database configuration
 const config = {
-    user: 'nerdblock_user',     // SQL Server Authentication username
-    password: 'NerdBlock123!',  // SQL Server Authentication password
-    server: 'DESKTOP-M3MKQMR',  // Your server name
-    database: 'NerdBlock',      // Your database name
+    user: "nerdblock_user",     // SQL Server Authentication username
+    password: "NerdBlock123!",  // SQL Server Authentication password
+    server: "LAPTOP-8N04EDR0",  // Your server name
+    database: "NerdBlock",      // Your database name
     options: {
         trustServerCertificate: true,
         enableArithAbort: true,

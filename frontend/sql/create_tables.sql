@@ -1,27 +1,3 @@
-
-/* Some Notes:
-* - Some key names light up, such as name, description and I'm not sure if it is a 
-* built in variable or not.
-* - We can add a sequence for primary keys like this:
-drop sequence if exists clients_id_seq;
-CREATE SEQUENCE clients_id_seq START 1;
-
-/*Note, you may improve by incorporating foreign key */
-CREATE TABLE IF NOT EXISTS clients_with_seq (
-    id int primary key default  nextval ('clients_id_seq')
-    , first_name varchar(50)
-    , last_name varchar(50)
-    , email varchar(50)
-    , password varchar(255)
-    ,extension varchar(50)
-    , sales_person_id int default 1
-);
-
-insert into clients_with_seq ( first_name, last_name, email, password, extension)
-VALUES 
-( 'client1', 'andersion','c@gmail.com', crypt('pass', gen_salt('bf')), '4178');
-*/
-
 -- Drop Tables (in reverse dependency order)
 DROP TABLE IF EXISTS ShippingReport;
 DROP TABLE IF EXISTS Transactions;
@@ -81,6 +57,7 @@ CREATE TABLE Products (
 
 CREATE TABLE Employees (
     EmployeeID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
+    Password VARCHAR(255),
     StoreID NUMERIC(9) FOREIGN KEY REFERENCES Stores(StoreID),
     FirstName VARCHAR(30),
     LastName VARCHAR(30),
@@ -100,6 +77,8 @@ CREATE TABLE Subscriptions (
 
 CREATE TABLE Subscriber (
     SubscriberID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
+    Username VARCHAR(50),
+    Password VARCHAR(255),
     CountryID NUMERIC(9) FOREIGN KEY REFERENCES Country(CountryID),
     GenreID NUMERIC(9) FOREIGN KEY REFERENCES Genres(GenreID),
     SubscriptionID NUMERIC(9) FOREIGN KEY REFERENCES Subscriptions(SubscriptionID),
@@ -174,20 +153,4 @@ CREATE TABLE ShippingReport (
     Date DATETIME,
     ShippingDuration NUMERIC(3)
 );
-
--- Add data to table
--- need more data
---INSERT INTO Products ( product_id, p_name, p_description, price)
---VALUES 
---( 344724234, "Griff's Hair",'Griff Statue', 10.00);
-
--- Country
-
--- Genre
-
--- Suppliers
-
--- Stores
-
---- Tables with depedencies
 

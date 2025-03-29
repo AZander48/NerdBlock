@@ -90,7 +90,7 @@ npm install
 1. Start the backend server:
 ```bash
 cd backend
-npm start
+node server.js
 ```
 
 2. Start the frontend development server:
