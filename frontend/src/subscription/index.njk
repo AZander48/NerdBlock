@@ -1,0 +1,194 @@
+---
+title: Subscription Management - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Subscription Management</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Choose your subscription plan and manage your monthly nerd boxes
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Subscription Plans -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      <!-- Plans will be dynamically inserted here -->
+    </section>
+
+    <!-- Subscription Management Features -->
+    <section class="bg-gray-700 rounded-2xl shadow-lg p-8 mb-16">
+      <h2 class="text-3xl font-bold mb-6 text-center">Subscription Management Features</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Account Management</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Update subscription details
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Change shipping address
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              View subscription history
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Subscription Options</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Pause subscription
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Cancel subscription
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Add additional blocks
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Fetch subscription plans from the database
+        const plans = await queryApi.getSubscriptionPlans();
+        console.log('Received plans:', plans);
+        
+        // Store plans in session storage for reference
+        sessionStorage.setItem('availablePlans', JSON.stringify(plans));
+        
+        // Get the container for the subscription plans
+        const plansContainer = document.querySelector('.grid');
+        
+        // Clear existing content
+        plansContainer.innerHTML = '';
+        
+        // Generate HTML for each plan
+        plans.forEach(plan => {
+            const planHtml = `
+                <div class="bg-gray-700 rounded-2xl shadow-lg p-8 text-center transform hover:scale-105 transition-transform">
+                    <h3 class="text-2xl font-bold mb-4">${plan.name} Block</h3>
+                    <div class="space-y-4 mb-4">
+                        <div class="text-3xl font-bold">
+                            Monthly: $${plan.monthlyPrice?.toFixed(2) || '15.99'}
+                        </div>
+                        <div class="text-xl text-gray-300">
+                            Annual: $${plan.annualPrice?.toFixed(2) || '149.99'}
+                        </div>
+                    </div>
+                    <ul class="text-left mb-6 space-y-2">
+                        ${plan.features.map(feature => `
+                            <li class="flex items-center">
+                                <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                ${feature}
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <button 
+                        data-plan="${plan.slug}"
+                        data-genre-id="${plan.id}"
+                        data-plan-name="${plan.name}"
+                        class="subscribe-button bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full transition-colors">
+                        Subscribe Now
+                    </button>
+                </div>
+            `;
+            
+            plansContainer.insertAdjacentHTML('beforeend', planHtml);
+        });
+
+        // Add click handlers to the newly created buttons
+        const subscribeButtons = document.querySelectorAll('.subscribe-button');
+        subscribeButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                try {
+                    const plan = button.getAttribute('data-plan');
+                    const genreId = button.getAttribute('data-genre-id');
+                    const planName = button.getAttribute('data-plan-name');
+                    
+                    console.log('Selected plan:', { plan, genreId, planName });
+
+                    // Store the selected plan details in session storage
+                    sessionStorage.setItem('selectedPlan', plan);
+                    sessionStorage.setItem('selectedGenreId', genreId);
+                    sessionStorage.setItem('selectedPlanName', planName);
+
+                    try {
+                        const currentUser = await queryApi.getCurrentSubscriber();
+                        if (currentUser) {
+                            window.location.href = `/subscription/confirm?plan=${plan}`;
+                            return;
+                        }
+                    } catch (error) {
+                        // If it's a 401, user is not logged in
+                        if (error.message.includes('401')) {
+                            const returnUrl = encodeURIComponent(`/subscription/confirm?plan=${plan}`);
+                            window.location.href = `/subscriberLogin?redirect=${returnUrl}`;
+                            return;
+                        }
+                        
+                        // If it's a 500 error, we'll assume there's an issue with the session
+                        if (error.message.includes('500')) {
+                            console.error('Server error when checking authentication:', error);
+                            const returnUrl = encodeURIComponent(`/subscription/confirm?plan=${plan}`);
+                            window.location.href = `/subscriberLogin?redirect=${returnUrl}`;
+                            return;
+                        }
+                        
+                        // For other errors, show an alert
+                        throw error;
+                    }
+
+                    // If we get here, redirect to login
+                    const returnUrl = encodeURIComponent(`/subscription/confirm?plan=${plan}`);
+                    window.location.href = `/subscriberLogin?redirect=${returnUrl}`;
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Something went wrong. Please try again. If the problem persists, please try logging out and back in.');
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error loading subscription plans:', error);
+        const container = document.querySelector('.max-w-6xl');
+        container.innerHTML = `
+            <div class="bg-red-500 text-white p-4 rounded-lg">
+                <p>Sorry, we couldn't load the subscription plans. Please try again later.</p>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %} 

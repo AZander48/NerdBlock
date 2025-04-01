@@ -1,0 +1,365 @@
+---
+title: Confirm Subscription - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">Confirm Your Subscription</h1>
+      
+      <div class="mb-8" id="planDetails">
+        <!-- Plan details will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-600 rounded w-3/4 mb-4"></div>
+          <div class="h-4 bg-gray-600 rounded w-1/2"></div>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-600 py-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Subscription Details</h2>
+        <ul class="space-y-3">
+          <li class="flex justify-between">
+            <span id="costLabel">Monthly Cost</span>
+            <span class="font-semibold" id="costAmount">$${currentPrice.toFixed(2)}</span>
+          </li>
+          <li class="flex justify-between">
+            <span>Shipping</span>
+            <span class="font-semibold">Free</span>
+          </li>
+          <li class="flex justify-between text-lg font-bold border-t border-gray-600 pt-3">
+            <span id="totalLabel">Total per Month</span>
+            <span id="totalAmount">$${currentPrice.toFixed(2)}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="space-y-4">
+        <button id="confirmButton" 
+                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+          Confirm Subscription
+        </button>
+        <a href="/subscription" 
+           class="block text-center text-gray-400 hover:text-white transition duration-200">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+const PLAN_DETAILS = {
+  horror: {
+    name: 'Horror',
+    description: 'Monthly box of horror-themed collectibles and exclusive items',
+    features: ['Horror-themed collectibles', 'Exclusive horror merch', 'Monthly horror surprises']
+  },
+  'science fiction': {
+    name: 'Science Fiction',
+    description: 'Monthly box of science fiction collectibles and gadgets',
+    features: ['Sci-fi collectibles', 'Space-themed items', 'Futuristic gadgets']
+  },
+  mystery: {
+    name: 'Mystery',
+    description: 'Monthly box of mystery collectibles and exclusive items',
+    features: ['Mystery collectibles', 'Detective gear', 'Exclusive comics']
+  }, 
+  adventure: {
+    name: 'Adventure',
+    description: 'Monthly box of adventure collectibles and exclusive items',
+    features: ['Adventure collectibles', 'Adventure gear', 'Exclusive adventure items']
+  },
+  fantasy: {
+    name: 'Fantasy',
+    description: 'Monthly box of fantasy collectibles and exclusive items',
+    features: ['Fantasy collectibles', 'Fantasy gear', 'Exclusive fantasy items']
+  } 
+};
+
+// Add shipping fee structure
+const SHIPPING_FEES = {
+  'US': 0, // Free shipping in US
+  'CA': 5.99,
+  'UK': 12.99,
+  'AU': 15.99,
+  'default': 19.99 // Default international shipping
+};
+
+// Add country list for common countries first, then others alphabetically
+const COUNTRIES = {
+  'US': 'United States',
+  'CA': 'Canada',
+  'UK': 'United Kingdom',
+  'AU': 'Australia',
+  // Add more countries alphabetically
+  'AF': 'Afghanistan',
+  'AL': 'Albania',
+  // ... add more countries as needed
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Get the selected plan from session storage
+    const plan = sessionStorage.getItem('selectedPlan');
+    const genreId = sessionStorage.getItem('selectedGenreId');
+    const planName = sessionStorage.getItem('selectedPlanName');
+    
+    console.log('Selected plan details:', { plan, genreId, planName });
+
+    if (!plan || !genreId || !planName) {
+      console.error('Missing plan details');
+      window.location.href = '/subscription';
+      return;
+    }
+
+    // Convert plan to lowercase for consistent lookup
+    const planKey = plan.toLowerCase();
+    
+    if (!PLAN_DETAILS[planKey]) {
+      console.error('Invalid plan:', planKey);
+      console.log('Available plans:', Object.keys(PLAN_DETAILS));
+      throw new Error(`Invalid plan: ${planKey}`);
+    }
+
+    // Get subscription types data
+    const subscriptionTypes = await queryApi.getSubscriptionTypes();
+    console.log('Subscription types:', subscriptionTypes);
+
+    // Get current subscriber data and available countries
+    const currentUser = await queryApi.getCurrentSubscriber();
+    const countries = await queryApi.getCountries(); // Will now include Tax and AdditionalFees
+    
+    console.log('Current user:', currentUser);
+    console.log('Available countries:', countries);
+
+    if (!currentUser) {
+      console.log('User not authenticated, redirecting to login');
+      const currentUrl = `${window.location.pathname}${window.location.search}`;
+      window.location.href = `/subscriberLogin?redirect=${encodeURIComponent(currentUrl)}`;
+      return;
+    }
+
+    // Get the prices for this genre
+    const genreData = subscriptionTypes[planName];
+    if (!genreData) {
+      console.error('No subscription data found for genre:', planName);
+      throw new Error(`No subscription data found for ${planName}`);
+    }
+
+    const prices = genreData.types;
+    let currentPrice = prices.Monthly?.price || 15.99;
+    
+    // Update the pricing in the UI
+    const planDetailsElement = document.getElementById('planDetails');
+    planDetailsElement.innerHTML = `
+      <h2 class="text-2xl font-bold mb-2">${PLAN_DETAILS[planKey].name}</h2>
+      <p class="text-gray-300 mb-4">${PLAN_DETAILS[planKey].description}</p>
+      <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <label class="flex items-center">
+            <input type="radio" name="subscriptionType" value="Monthly" checked>
+            <span class="ml-2">Monthly</span>
+          </label>
+          <span class="font-bold">$${currentPrice.toFixed(2)}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <label class="flex items-center">
+            <input type="radio" name="subscriptionType" value="Annual">
+            <span class="ml-2">Annual</span>
+          </label>
+          <span class="font-bold">$${prices.Annual?.price.toFixed(2) || '149.99'}</span>
+        </div>
+      </div>
+      <ul class="space-y-2 mt-4">
+        ${PLAN_DETAILS[planKey].features.map(feature => `
+          <li class="flex items-center">
+            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            ${feature}
+          </li>
+        `).join('')}
+      </ul>
+    `;
+
+    // Update the subscription details section
+    const subscriptionDetailsElement = document.querySelector('.border-t.border-gray-600');
+    subscriptionDetailsElement.innerHTML = `
+      <h2 class="text-xl font-semibold mb-4">Subscription Details</h2>
+      
+      <div class="mb-4">
+        <label for="country" class="block text-sm font-medium mb-2">Shipping Country</label>
+        <select id="country" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white">
+          <option value="">Select Country</option>
+          ${countries.map(country => `
+            <option value="${country.CountryID}" 
+                    ${currentUser.CountryID === country.CountryID ? 'selected' : ''}>
+              ${country.CountryName}
+            </option>
+          `).join('')}
+        </select>
+      </div>
+
+      <ul class="space-y-3">
+        <li class="flex justify-between">
+          <span id="costLabel">Monthly Cost</span>
+          <span class="font-semibold" id="costAmount">$${currentPrice.toFixed(2)}</span>
+        </li>
+        <li class="flex justify-between">
+          <span>Shipping</span>
+          <span class="font-semibold" id="shippingAmount">
+            ${getShippingDisplay(currentUser.CountryID)}
+          </span>
+        </li>
+        <li class="flex justify-between">
+          <span>Tax</span>
+          <span class="font-semibold" id="taxAmount">
+            ${getTaxDisplay(currentUser.CountryID, currentPrice)}
+          </span>
+        </li>
+        <li class="flex justify-between text-lg font-bold border-t border-gray-600 pt-3">
+          <span id="totalLabel">Total per Month</span>
+          <span id="totalAmount">$${currentPrice.toFixed(2)}</span>
+        </li>
+      </ul>
+    `;
+
+    // Helper function to get shipping fee display
+    function getShippingDisplay(countryId) {
+      const country = countries.find(c => c.CountryID === countryId);
+      const shippingFee = country?.AdditionalFees || 0;
+      return shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`;
+    }
+
+    // Helper function to get tax display
+    function getTaxDisplay(countryId, basePrice) {
+      const country = countries.find(c => c.CountryID === countryId);
+      const taxRate = country?.Tax || 0;
+      const taxAmount = (basePrice * taxRate) / 100;
+      return `${taxRate}% ($${taxAmount.toFixed(2)})`;
+    }
+
+    // Function to calculate total price
+    function calculateTotal(basePrice, countryId) {
+      const country = countries.find(c => c.CountryID === countryId);
+      const shippingFee = country?.AdditionalFees || 0;
+      const taxRate = country?.Tax || 0;
+      const taxAmount = (basePrice * taxRate) / 100;
+      return basePrice + shippingFee + taxAmount;
+    }
+
+    // Function to update prices based on subscription type and country
+    function updatePrices(subscriptionType, countryId) {
+      const basePrice = prices[subscriptionType]?.price || (subscriptionType === 'Monthly' ? 15.99 : 149.99);
+      const country = countries.find(c => c.CountryID === countryId);
+      
+      const shippingAmount = document.getElementById('shippingAmount');
+      const taxAmount = document.getElementById('taxAmount');
+      const costLabel = document.getElementById('costLabel');
+      const costAmount = document.getElementById('costAmount');
+      const totalLabel = document.getElementById('totalLabel');
+      const totalAmount = document.getElementById('totalAmount');
+
+      shippingAmount.textContent = getShippingDisplay(countryId);
+      taxAmount.textContent = getTaxDisplay(countryId, basePrice);
+
+      if (subscriptionType === 'Annual') {
+        const monthlyBasePrice = basePrice / 12;
+        const monthlyTotal = calculateTotal(monthlyBasePrice, countryId);
+        costLabel.textContent = 'Annual Cost';
+        costAmount.textContent = `$${basePrice.toFixed(2)}`;
+        totalLabel.textContent = 'Monthly Equivalent (including shipping & tax)';
+        totalAmount.textContent = `$${monthlyTotal.toFixed(2)}`;
+      } else {
+        costLabel.textContent = 'Monthly Cost';
+        costAmount.textContent = `$${basePrice.toFixed(2)}`;
+        totalLabel.textContent = 'Total per Month';
+        totalAmount.textContent = `$${calculateTotal(basePrice, countryId).toFixed(2)}`;
+      }
+    }
+
+    // Add event listeners for radio buttons and country selector
+    const radioButtons = document.querySelectorAll('input[name="subscriptionType"]');
+    const countrySelect = document.getElementById('country');
+
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        updatePrices(e.target.value, countrySelect.value);
+      });
+    });
+
+    countrySelect.addEventListener('change', (e) => {
+      const selectedType = document.querySelector('input[name="subscriptionType"]:checked').value;
+      updatePrices(selectedType, e.target.value);
+    });
+
+    // Try to get user's country automatically
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      if (data.country) {
+        countrySelect.value = data.country;
+        const selectedType = document.querySelector('input[name="subscriptionType"]:checked').value;
+        updatePrices(selectedType, data.country);
+      }
+    } catch (error) {
+      console.error('Error detecting country:', error);
+    }
+
+    // Update confirm button handler to include tax and shipping
+    const confirmButton = document.getElementById('confirmButton');
+    confirmButton.addEventListener('click', async () => {
+      try {
+        const countryId = parseInt(countrySelect.value);
+        if (!countryId) {
+          alert('Please select a shipping country');
+          return;
+        }
+
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Processing...';
+
+        const selectedType = document.querySelector('input[name="subscriptionType"]:checked').value;
+        const country = countries.find(c => c.CountryID === countryId);
+        const basePrice = prices[selectedType]?.price || (selectedType === 'Monthly' ? 15.99 : 149.99);
+        
+        const subscription = await queryApi.createSubscription({
+          plan: planName,
+          type: selectedType,
+          userId: currentUser.id,
+          countryId: countryId,
+          shippingFee: country.AdditionalFees,
+          taxRate: country.Tax,
+          taxAmount: (basePrice * country.Tax) / 100,
+          totalAmount: calculateTotal(basePrice, countryId)
+        });
+
+        // Store details for success page
+        sessionStorage.setItem('selectedPlan', planName);
+        sessionStorage.setItem('selectedType', selectedType);
+        sessionStorage.setItem('countryId', countryId.toString());
+        sessionStorage.setItem('basePrice', basePrice.toString());
+        sessionStorage.removeItem('selectedGenreId');
+        sessionStorage.removeItem('selectedPlanName');
+        
+        window.location.href = '/subscription/success';
+      } catch (error) {
+        console.error('Subscription error:', error);
+        alert('Failed to process subscription. Please try again.');
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Confirm Subscription';
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in confirm page:', error);
+    alert('Something went wrong. Please try again.');
+  }
+});
+</script>
+{% endblock %} 

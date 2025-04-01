@@ -1,10 +1,10 @@
 --Country
 INSERT INTO Country (CountryName, Tax, AdditionalFees) VALUES
-('Canada', 15, 2.50),
-('USA', 10, 1.75),
-('UK', 20, 3.00),
-('Germany', 19, 2.25),
-('Australia', 10, 1.50);
+('Canada', 15.00, 5.99),
+('USA', 10.00, 0.00),
+('UK', 20.00, 12.99),
+('Germany', 19.00, 15.99),
+('Australia', 10.00, 21.50);
 --Genres
 INSERT INTO Genres (Name, Description) VALUES
 ('Fantasy', 'Fantasy genre description'),
@@ -41,8 +41,8 @@ INSERT INTO Employees (StoreID, Password, FirstName, LastName, PhoneNumber, Emai
 ( 4, 'daisypass', 'Daisy', 'Williams', '4035554444', 'daisy@example.com', '2024-03-25', 1, 1),
 ( 5, 'etaylorpw', 'Ethan', 'Taylor', '6135555555', 'ethan@example.com', '2020-07-20', 0, 0);
 
---Subscriptions
-INSERT INTO Subscriptions (GenreID, Type, Price) VALUES
+--SubscriptionTypes
+INSERT INTO SubscriptionTypes (GenreID, Type, Price) VALUES
 (1, 'Monthly', 15.99),  -- Fantasy
 (1, 'Annual', 149.99),
 (2, 'Monthly', 15.99),  -- Science Fiction
@@ -53,16 +53,20 @@ INSERT INTO Subscriptions (GenreID, Type, Price) VALUES
 (4, 'Annual', 149.99),
 (5, 'Monthly', 15.99),  -- Adventure
 (5, 'Annual', 149.99);
+--Subscriptions
+INSERT INTO Subscriptions (SubscriptionTypeID, SubscriptionStartDate) VALUES
+(1, '2024-01-01'),
+(2, '2024-01-01'),
+(3, '2024-01-01'),
+(4, '2024-01-01'),
+(5, '2024-01-01');
 --Subscriber
 INSERT INTO Subscriber (Username, Password, CountryID, GenreID, SubscriptionID, FirstName, LastName, PhoneNumber, EmailAddress, ShippingAddress, BillingAddress, DateCreated, PaymentType, SubscriptionStartDate) VALUES
 ('johndoe', 'password123', 1, 1, 1, 'John', 'Doe', '4165559999', 'john.doe@example.com', '123 Maple St, Toronto', '456 Oak St, Toronto', '2024-01-01', 'Credit Card', '2024-01-01'),
 ('sconnor', 'terminator', 2, 2, 2, 'Sarah', 'Connor', '6045558888', 'sarah.connor@example.com', '789 Pine St, Vancouver', '101 Birch St, Vancouver', '2024-03-20', 'PayPal', '2024-03-20'),
 ('rgrimes', 'coral123', 3, 3, 3, 'Rick', 'Grimes', '5145557777', 'rick.grimes@example.com', '102 Cedar St, Montreal', '204 Elm St, Montreal', '2023-11-20', 'Debit Card', '2023-11-20'),
 ('wwhite', 'heisenberg', 4, 4, 4, 'Walter', 'White', '4035556666', 'walter.white@example.com', '303 Aspen St, Calgary', '405 Spruce St, Calgary', '2023-10-10', 'Bank Transfer', '2023-10-10'),
-('dprince', 'amazon123', 5, 5, 5, 'Diana', 'Prince', '6135555555', 'diana.prince@example.com', '506 Chestnut St, Ottawa', '608 Willow St, Ottawa', '2023-09-05', 'Gift Card', '2023-09-05'),
-('asmith', 'secure123', 1, 1, 1, 'Anna', 'Smith', '4161112222', 'anna.smith@example.com', '10 Elm St', '11 Elm St', '2022-10-01', 'Credit Card', '2022-10-01'),
-('bjohnson', 'paypalpass', 2, 2, 2, 'Brian', 'Johnson', '6043334444', 'brian.johnson@example.com', '20 Oak St', '21 Oak St', '2022-09-01', 'PayPal', '2022-09-01'),
-('cdavis', 'pinepass', 3, 1, 3, 'Carol', 'Davis', '5145556666', 'carol.davis@example.com', '30 Pine St', '31 Pine St', '2022-09-01', 'Debit Card', '2022-09-01');
+('dprince', 'amazon123', 5, 5, 5, 'Diana', 'Prince', '6135555555', 'diana.prince@example.com', '506 Chestnut St, Ottawa', '608 Willow St, Ottawa', '2023-09-05', 'Gift Card', '2023-09-05');
 --Inventory
 INSERT INTO Inventory (ProductID, ProductName, Quantity) VALUES
 (1, 'Magic Wand', 100),

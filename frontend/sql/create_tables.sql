@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS Employees;
 DROP TABLE IF EXISTS Products;
 DROP TABLE IF EXISTS Stores;
 DROP TABLE IF EXISTS Suppliers;
+DROP TABLE IF EXISTS SubscriptionTypes;
 DROP TABLE IF EXISTS Genres;
 DROP TABLE IF EXISTS Country;
 
@@ -20,8 +21,8 @@ DROP TABLE IF EXISTS Country;
 CREATE TABLE Country (
     CountryID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
     CountryName VARCHAR(30),
-    Tax NUMERIC(2),
-    AdditionalFees DECIMAL(3,2)
+    Tax DECIMAL(5, 2),
+    AdditionalFees DECIMAL(5,2)
 );
 
 CREATE TABLE Genres (
@@ -68,11 +69,16 @@ CREATE TABLE Employees (
     IsStoreOwner BIT
 );
 
-CREATE TABLE Subscriptions (
-    SubscriptionID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE SubscriptionTypes (
+    SubscriptionTypeID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
     GenreID NUMERIC(9) FOREIGN KEY REFERENCES Genres(GenreID),
     Type VARCHAR(30),
-    Price DECIMAL(9,2),
+    Price DECIMAL(9,2)
+);
+
+CREATE TABLE Subscriptions (
+    SubscriptionID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
+    SubscriptionTypeID NUMERIC(9) FOREIGN KEY REFERENCES SubscriptionTypes(SubscriptionTypeID),
     SubscriptionStartDate DATETIME
 );
 
