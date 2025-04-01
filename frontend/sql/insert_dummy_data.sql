@@ -42,22 +42,27 @@ INSERT INTO Employees (StoreID, Password, FirstName, LastName, PhoneNumber, Emai
 ( 5, 'etaylorpw', 'Ethan', 'Taylor', '6135555555', 'ethan@example.com', '2020-07-20', 0, 0);
 
 --Subscriptions
-INSERT INTO Subscriptions (Type, Price) VALUES
-('Monthly', 15.99),
-('Annual', 149.99),
-('Quarterly', 39.99),
-('Lifetime', 499.99),
-('Trial', 0.00);
+INSERT INTO Subscriptions (GenreID, Type, Price) VALUES
+(1, 'Monthly', 15.99),  -- Fantasy
+(1, 'Annual', 149.99),
+(2, 'Monthly', 15.99),  -- Science Fiction
+(2, 'Annual', 149.99),
+(3, 'Monthly', 15.99),  -- Mystery
+(3, 'Annual', 149.99),
+(4, 'Monthly', 15.99),  -- Horror
+(4, 'Annual', 149.99),
+(5, 'Monthly', 15.99),  -- Adventure
+(5, 'Annual', 149.99);
 --Subscriber
-INSERT INTO Subscriber (Username, Password, CountryID, GenreID, SubscriptionID, FirstName, LastName, PhoneNumber, EmailAddress, ShippingAddress, BillingAddress, DateCreated, PaymentType) VALUES
-('johndoe', 'password123', 1, 1, 1, 'John', 'Doe', '4165559999', 'john.doe@example.com', '123 Maple St, Toronto', '456 Oak St, Toronto', '2024-01-01', 'Credit Card'),
-('sconnor', 'terminator', 2, 2, 2, 'Sarah', 'Connor', '6045558888', 'sarah.connor@example.com', '789 Pine St, Vancouver', '101 Birch St, Vancouver', '2024-03-20', 'PayPal'),
-('rgrimes', 'coral123', 3, 3, 3, 'Rick', 'Grimes', '5145557777', 'rick.grimes@example.com', '102 Cedar St, Montreal', '204 Elm St, Montreal', '2023-11-20', 'Debit Card'),
-('wwhite', 'heisenberg', 4, 4, 4, 'Walter', 'White', '4035556666', 'walter.white@example.com', '303 Aspen St, Calgary', '405 Spruce St, Calgary', '2023-10-10', 'Bank Transfer'),
-('dprince', 'amazon123', 5, 5, 5, 'Diana', 'Prince', '6135555555', 'diana.prince@example.com', '506 Chestnut St, Ottawa', '608 Willow St, Ottawa', '2023-09-05', 'Gift Card'),
-('asmith', 'secure123', 1, 1, 1, 'Anna', 'Smith', '4161112222', 'anna.smith@example.com', '10 Elm St', '11 Elm St', DATEADD(month, -11, GETDATE()), 'Credit Card'),
-('bjohnson', 'paypalpass', 2, 2, 2, 'Brian', 'Johnson', '6043334444', 'brian.johnson@example.com', '20 Oak St', '21 Oak St', DATEADD(month, -10, GETDATE()), 'PayPal'),
-('cdavis', 'pinepass', 3, 1, 3, 'Carol', 'Davis', '5145556666', 'carol.davis@example.com', '30 Pine St', '31 Pine St', DATEADD(month, -9, GETDATE()), 'Debit Card');
+INSERT INTO Subscriber (Username, Password, CountryID, GenreID, SubscriptionID, FirstName, LastName, PhoneNumber, EmailAddress, ShippingAddress, BillingAddress, DateCreated, PaymentType, SubscriptionStartDate) VALUES
+('johndoe', 'password123', 1, 1, 1, 'John', 'Doe', '4165559999', 'john.doe@example.com', '123 Maple St, Toronto', '456 Oak St, Toronto', '2024-01-01', 'Credit Card', '2024-01-01'),
+('sconnor', 'terminator', 2, 2, 2, 'Sarah', 'Connor', '6045558888', 'sarah.connor@example.com', '789 Pine St, Vancouver', '101 Birch St, Vancouver', '2024-03-20', 'PayPal', '2024-03-20'),
+('rgrimes', 'coral123', 3, 3, 3, 'Rick', 'Grimes', '5145557777', 'rick.grimes@example.com', '102 Cedar St, Montreal', '204 Elm St, Montreal', '2023-11-20', 'Debit Card', '2023-11-20'),
+('wwhite', 'heisenberg', 4, 4, 4, 'Walter', 'White', '4035556666', 'walter.white@example.com', '303 Aspen St, Calgary', '405 Spruce St, Calgary', '2023-10-10', 'Bank Transfer', '2023-10-10'),
+('dprince', 'amazon123', 5, 5, 5, 'Diana', 'Prince', '6135555555', 'diana.prince@example.com', '506 Chestnut St, Ottawa', '608 Willow St, Ottawa', '2023-09-05', 'Gift Card', '2023-09-05'),
+('asmith', 'secure123', 1, 1, 1, 'Anna', 'Smith', '4161112222', 'anna.smith@example.com', '10 Elm St', '11 Elm St', '2022-10-01', 'Credit Card', '2022-10-01'),
+('bjohnson', 'paypalpass', 2, 2, 2, 'Brian', 'Johnson', '6043334444', 'brian.johnson@example.com', '20 Oak St', '21 Oak St', '2022-09-01', 'PayPal', '2022-09-01'),
+('cdavis', 'pinepass', 3, 1, 3, 'Carol', 'Davis', '5145556666', 'carol.davis@example.com', '30 Pine St', '31 Pine St', '2022-09-01', 'Debit Card', '2022-09-01');
 --Inventory
 INSERT INTO Inventory (ProductID, ProductName, Quantity) VALUES
 (1, 'Magic Wand', 100),

@@ -260,25 +260,7 @@ ORDER BY SUM(t.TotalPrice) DESC;
 </div>
 
 <script>
-// Function to fetch data from the API
-async function fetchData(endpoint) {
-    try {
-        const response = await fetch(`http://localhost:3000/api/queries/${endpoint}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        // Show error message to user
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'bg-red-500 text-white p-4 rounded-lg mt-4';
-        errorDiv.textContent = `Error loading data: ${error.message}`;
-        document.querySelector('.max-w-6xl').appendChild(errorDiv);
-        return null;
-    }
-}
+import { queryApi } from './api/queries.js';
 
 // Function to format date
 function formatDate(dateString) {
@@ -393,16 +375,24 @@ function populateSampleTable(tableId, data) {
 
 // Function to execute queries
 async function executeQuery(queryType) {
-    const data = await fetchData(queryType);
-    if (data) {
-        if (queryType === 'countries') {
-            populateSampleTable('countriesTable', data);
-            populateResultsTable('countries', data);
-        } else if (queryType === 'products') {
-            populateSampleTable('productsTable', data);
-        } else {
-            populateResultsTable(queryType, data);
+    try {
+        const data = await queryApi[`get${queryType.charAt(0).toUpperCase() + queryType.slice(1)}`]();
+        if (data) {
+            if (queryType === 'countries') {
+                populateSampleTable('countriesTable', data);
+                populateResultsTable('countries', data);
+            } else if (queryType === 'products') {
+                populateSampleTable('productsTable', data);
+            } else {
+                populateResultsTable(queryType, data);
+            }
         }
+    } catch (error) {
+        // Show error message to user
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'bg-red-500 text-white p-4 rounded-lg mt-4';
+        errorDiv.textContent = `Error loading data: ${error.message}`;
+        document.querySelector('.max-w-6xl').appendChild(errorDiv);
     }
 }
 

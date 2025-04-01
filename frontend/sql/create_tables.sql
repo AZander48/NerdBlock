@@ -72,12 +72,13 @@ CREATE TABLE Subscriptions (
     SubscriptionID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
     GenreID NUMERIC(9) FOREIGN KEY REFERENCES Genres(GenreID),
     Type VARCHAR(30),
-    Price DECIMAL(9,2)
+    Price DECIMAL(9,2),
+    SubscriptionStartDate DATETIME
 );
 
 CREATE TABLE Subscriber (
     SubscriberID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
-    Username VARCHAR(50),
+    UserName VARCHAR(50),
     Password VARCHAR(255),
     CountryID NUMERIC(9) FOREIGN KEY REFERENCES Country(CountryID),
     GenreID NUMERIC(9) FOREIGN KEY REFERENCES Genres(GenreID),
@@ -89,7 +90,8 @@ CREATE TABLE Subscriber (
     ShippingAddress VARCHAR(30),
     BillingAddress VARCHAR(30),
     DateCreated DATETIME,
-    PaymentType VARCHAR(30)
+    PaymentType VARCHAR(30),
+    SubscriptionStartDate DATETIME
 );
 
 CREATE TABLE Inventory (
