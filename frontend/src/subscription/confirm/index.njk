@@ -269,36 +269,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmButton = document.getElementById('confirmButton');
     confirmButton.addEventListener('click', async () => {
       try {
-        confirmButton.disabled = true;
-        confirmButton.textContent = 'Processing...';
-
-        const selectedType = document.querySelector('input[name="subscriptionType"]:checked').value;
-        
-        const subscription = await queryApi.createSubscription({
+        const subscriptionData = {
           plan: planName,
-          type: selectedType,
-          userId: currentUser.id,
-          countryId: currentUser.CountryID,
-          shippingFee: currentUser.AdditionalFees,
-          taxRate: currentUser.Tax,
-          taxAmount: (currentPrice * currentUser.Tax) / 100,
-          totalAmount: calculateTotal(currentPrice, currentUser.CountryID)
-        });
+          type: document.querySelector('input[name="subscriptionType"]:checked').value,
+          userId: currentUser.SubscriberID
+        };
 
-        // Store details for success page
-        sessionStorage.setItem('selectedPlan', planName);
-        sessionStorage.setItem('selectedType', selectedType);
-        sessionStorage.setItem('countryId', currentUser.CountryID.toString());
-        sessionStorage.setItem('basePrice', currentPrice.toString());
-        sessionStorage.removeItem('selectedGenreId');
-        sessionStorage.removeItem('selectedPlanName');
+        const result = await queryApi.createSubscription(subscriptionData);
         
+        // Store subscription details for success page
+        sessionStorage.setItem('subscriptionDetails', JSON.stringify({
+          plan: PLAN_DETAILS[planKey].name,
+          type: subscriptionData.type,
+          subscriptionId: result.subscriptionId
+        }));
+
+        // Force reload of the main subscription page when returning
+        sessionStorage.setItem('forceReload', 'true');
+
         window.location.href = '/subscription/success';
       } catch (error) {
-        console.error('Subscription error:', error);
-        alert('Failed to process subscription. Please try again.');
-        confirmButton.disabled = false;
-        confirmButton.textContent = 'Confirm Subscription';
+        console.error('Error creating subscription:', error);
+        alert('Failed to create subscription. Please try again.');
       }
     });
 

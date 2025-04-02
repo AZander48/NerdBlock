@@ -129,7 +129,7 @@ async function loadCurrentSubscription() {
         <div>
           <h3 class="text-xl font-semibold mb-4">Subscription Details</h3>
           <ul class="space-y-3">
-            <li><span class="text-gray-300">Plan:</span> ${genreName} Block</li>
+            <li><span class="text-gray-300">Plan:</span> ${genreName}</li>
             <li><span class="text-gray-300">Type:</span> ${subscriptionType}</li>
             <li><span class="text-gray-300">Start Date:</span> ${startDate}</li>
           </ul>
@@ -182,7 +182,7 @@ async function loadAvailablePlans() {
     plans.forEach(plan => {
       const planHtml = `
         <div class="bg-gray-700 rounded-2xl shadow-lg p-8 text-center transform hover:scale-105 transition-transform">
-          <h3 class="text-2xl font-bold mb-4">${plan.name} Block</h3>
+          <h3 class="text-2xl font-bold mb-4">${plan.name}</h3>
           <div class="space-y-4 mb-4">
             <div class="text-3xl font-bold">
               Monthly: $${plan.monthlyPrice?.toFixed(2) || '15.99'}
@@ -247,8 +247,16 @@ async function loadAvailablePlans() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadCurrentSubscription();
-  await loadAvailablePlans();
+    // Check if we need to force a reload of the data
+    const forceReload = sessionStorage.getItem('forceReload');
+    if (forceReload) {
+        sessionStorage.removeItem('forceReload');
+        // Clear any cached data
+        sessionStorage.removeItem('currentSubscription');
+    }
+
+    await loadCurrentSubscription();
+    await loadAvailablePlans();
 });
 </script>
 {% endblock %} 

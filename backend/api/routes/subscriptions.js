@@ -23,15 +23,13 @@ router.post('/', async (req, res) => {
                 WHERE g.Name = @plan AND st.Type = @type
             `);
 
-        console.log('Subscription type result:', subscriptionTypeResult.recordset);
-
         if (subscriptionTypeResult.recordset.length === 0) {
             return res.status(400).json({ message: 'Invalid subscription plan or type' });
         }
 
         const subscriptionTypeId = subscriptionTypeResult.recordset[0].SubscriptionTypeID;
 
-        // Create a new subscription in the Subscriptions table
+        // Create new subscription
         const newSubscription = await pool.request()
             .input('subscriptionTypeId', sql.Numeric(9), subscriptionTypeId)
             .input('startDate', sql.DateTime, new Date())
@@ -48,19 +46,49 @@ router.post('/', async (req, res) => {
 
         const subscriptionId = newSubscription.recordset[0].SubscriptionID;
 
-        // Update the Subscriber table with the new SubscriptionID
+        // Update the subscriber with the new subscription ID
         await pool.request()
             .input('subscriptionId', sql.Numeric(9), subscriptionId)
-            .input('userId', sql.Int, userId)
+            .input('subscriberId', sql.Int, userId)
             .query(`
                 UPDATE Subscriber
                 SET SubscriptionID = @subscriptionId
-                WHERE SubscriberID = @userId
+                WHERE SubscriberID = @subscriberId
+            `);
+
+        // Get the updated subscriber details
+        const updatedSubscriber = await pool.request()
+            .input('subscriberId', sql.Int, userId)
+            .query(`
+                SELECT 
+                    s.SubscriberID,
+                    s.FirstName,
+                    s.LastName,
+                    s.EmailAddress,
+                    s.PhoneNumber,
+                    s.ShippingAddress as Address,
+                    s.BillingAddress as City,
+                    s.CountryID,
+                    c.CountryName as CountryName,
+                    c.Tax as TaxRate,
+                    c.AdditionalFees as ShippingRate,
+                    s.SubscriptionID,
+                    sub.SubscriptionStartDate,
+                    st.Type as SubscriptionType,
+                    g.Name as GenreName,
+                    st.Price as SubscriptionPrice
+                FROM Subscriber s
+                LEFT JOIN Country c ON s.CountryID = c.CountryID
+                LEFT JOIN Subscriptions sub ON s.SubscriptionID = sub.SubscriptionID
+                LEFT JOIN SubscriptionTypes st ON sub.SubscriptionTypeID = st.SubscriptionTypeID
+                LEFT JOIN Genres g ON st.GenreID = g.GenreID
+                WHERE s.SubscriberID = @subscriberId
             `);
 
         res.status(201).json({ 
             message: 'Subscription created successfully', 
-            subscriptionId: subscriptionId
+            subscriptionId: subscriptionId,
+            subscriber: updatedSubscriber.recordset[0]
         });
     } catch (error) {
         console.error('Error creating subscription:', error);
