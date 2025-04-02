@@ -17,134 +17,112 @@ title: Inventory Management - Nerdblock
     <!-- Inventory Overview -->
     <section class="mb-16">
       <h2 class="text-3xl font-bold mb-8 text-center">Inventory Overview</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-purple-500 mb-2">10,000+</div>
-          <h3 class="text-xl font-semibold mb-2">Total Items</h3>
-          <p class="text-gray-300">Unique collectibles in stock</p>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-green-500 mb-2">98%</div>
-          <h3 class="text-xl font-semibold mb-2">Stock Accuracy</h3>
-          <p class="text-gray-300">Real-time inventory tracking</p>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-blue-500 mb-2">24/7</div>
-          <h3 class="text-xl font-semibold mb-2">Monitoring</h3>
-          <p class="text-gray-300">Continuous inventory updates</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="inventoryStats">
+        <!-- Stats will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-32 bg-gray-700 rounded-2xl"></div>
         </div>
       </div>
     </section>
 
-    <!-- Inventory Features -->
+    <!-- Inventory List -->
     <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center">Inventory Features</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
-          <h3 class="text-2xl font-bold mb-6">Stock Management</h3>
-          <ul class="space-y-4">
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Real-time Tracking</h4>
-                <p class="text-gray-300">Monitor stock levels and inventory movements in real-time</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Automated Alerts</h4>
-                <p class="text-gray-300">Get notified when stock levels are low or items need reordering</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Stock Transfer</h4>
-                <p class="text-gray-300">Easily transfer items between warehouse and retail locations</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
-          <h3 class="text-2xl font-bold mb-6">Analytics & Reporting</h3>
-          <ul class="space-y-4">
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Inventory Analytics</h4>
-                <p class="text-gray-300">Track inventory trends and forecast future needs</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Custom Reports</h4>
-                <p class="text-gray-300">Generate detailed reports for inventory analysis</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Performance Metrics</h4>
-                <p class="text-gray-300">Monitor inventory turnover and stock efficiency</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- Warehouse Integration -->
-    <section class="bg-gray-700 rounded-2xl shadow-lg p-8">
-      <h2 class="text-3xl font-bold mb-8 text-center">Warehouse Integration</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Warehouse Management</h3>
-          <p class="text-gray-300">Efficient storage and organization of inventory</p>
-        </div>
-
-        <div class="text-center">
-          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Order Processing</h3>
-          <p class="text-gray-300">Streamlined order fulfillment system</p>
-        </div>
-
-        <div class="text-center">
-          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Shipping Integration</h3>
-          <p class="text-gray-300">Seamless shipping and delivery management</p>
+      <h2 class="text-3xl font-bold mb-8 text-center">Current Inventory</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Product Name</th>
+                <th class="px-6 py-4">Genre</th>
+                <th class="px-6 py-4">Description</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Quantity</th>
+                <th class="px-6 py-4">Status</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryList">
+              <!-- Inventory items will be populated by JavaScript -->
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
   </div>
 </div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+async function loadInventory() {
+    try {
+        const data = await queryApi.getInventoryOverview();
+        
+        // Update stats
+        const statsDiv = document.getElementById('inventoryStats');
+        statsDiv.innerHTML = `
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-purple-500 mb-2">${data.stats.UniqueProducts}</div>
+                <h3 class="text-xl font-semibold mb-2">Unique Products</h3>
+                <p class="text-gray-300">Different items in stock</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-green-500 mb-2">${data.stats.TotalItems}</div>
+                <h3 class="text-xl font-semibold mb-2">Total Items</h3>
+                <p class="text-gray-300">Total inventory count</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-blue-500 mb-2">${data.stats.GenreCount}</div>
+                <h3 class="text-xl font-semibold mb-2">Categories</h3>
+                <p class="text-gray-300">Product categories</p>
+            </div>
+        `;
+
+        // Update inventory list
+        const inventoryList = document.getElementById('inventoryList');
+        inventoryList.innerHTML = data.inventory.map(item => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">
+                    ${item.ProductName}
+                    ${item.ProductName !== item.OriginalProductName ? 
+                        `<div class="text-xs text-gray-400">(${item.OriginalProductName})</div>` : 
+                        ''}
+                </td>
+                <td class="px-6 py-4">${item.GenreName || 'Uncategorized'}</td>
+                <td class="px-6 py-4">${item.Description || 'No description'}</td>
+                <td class="px-6 py-4">$${item.Price ? item.Price.toFixed(2) : '0.00'}</td>
+                <td class="px-6 py-4">${item.Quantity}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 rounded-full text-xs ${
+                        item.Quantity > 10 ? 'bg-green-500' :
+                        item.Quantity > 0 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                    }">
+                        ${
+                            item.Quantity > 10 ? 'In Stock' :
+                            item.Quantity > 0 ? 'Low Stock' :
+                            'Out of Stock'
+                        }
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        alert('Failed to load inventory data. Please try again later.');
+    }
+}
+
+// Load inventory when the page loads
+document.addEventListener('DOMContentLoaded', loadInventory);
+</script>
 {% endblock %} 

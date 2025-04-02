@@ -12,12 +12,14 @@ const productQueries = {
             const result = await pool.request()
                 .query(`
                     SELECT 
-                        g.[GenreID] as GenreID,
+                        CAST(g.[GenreID] as INT) as GenreID,
                         g.[Name] as GenreName,
                         ISNULL(g.[Description], 'Explore our collection') as GenreDescription,
-                        COUNT(p.[ProductID]) as ProductCount
+                        COUNT(DISTINCT p.[ProductID]) as ProductCount,
+                        SUM(i.[Quantity]) as TotalInventory
                     FROM [Genres] g
                     LEFT JOIN [Products] p ON g.[GenreID] = p.[GenreID]
+                    LEFT JOIN [Inventory] i ON p.[ProductID] = i.[ProductID]
                     GROUP BY g.[GenreID], g.[Name], g.[Description]
                     ORDER BY g.[Name]
                 `);
@@ -42,9 +44,12 @@ const productQueries = {
                         p.[Description],
                         p.[Price],
                         CAST(p.[GenreID] as INT) as GenreID,
-                        g.[Name] as GenreName
+                        g.[Name] as GenreName,
+                        i.[Quantity] as StockQuantity,
+                        i.[ProductName] as InventoryName
                     FROM [Products] p
                     JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                    LEFT JOIN [Inventory] i ON p.[ProductID] = i.[ProductID]
                     WHERE p.[GenreID] = @genreId
                     ORDER BY p.[Name]
                 `);
@@ -53,6 +58,47 @@ const productQueries = {
             return result.recordset;
         } catch (error) {
             console.error('Database error in getProductsByGenre:', error);
+            throw error;
+        }
+    },
+
+    getInventoryOverview: async (pool) => {
+        try {
+            const result = await pool.request()
+                .query(`
+                    SELECT 
+                        i.[InventoryID],
+                        i.[ProductID],
+                        i.[ProductName],
+                        i.[Quantity],
+                        p.[Name] as OriginalProductName,
+                        p.[Description],
+                        p.[Price],
+                        g.[Name] as GenreName
+                    FROM [Inventory] i
+                    LEFT JOIN [Products] p ON i.[ProductID] = p.[ProductID]
+                    LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                    ORDER BY g.[Name], p.[Name]
+                `);
+            
+            // Get summary statistics
+            const stats = await pool.request()
+                .query(`
+                    SELECT 
+                        COUNT(DISTINCT i.[ProductID]) as UniqueProducts,
+                        SUM(i.[Quantity]) as TotalItems,
+                        COUNT(DISTINCT g.[GenreID]) as GenreCount
+                    FROM [Inventory] i
+                    LEFT JOIN [Products] p ON i.[ProductID] = p.[ProductID]
+                    LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                `);
+
+            return {
+                inventory: result.recordset,
+                stats: stats.recordset[0]
+            };
+        } catch (error) {
+            console.error('Database error in getInventoryOverview:', error);
             throw error;
         }
     }
@@ -170,6 +216,27 @@ router.get('/by-genre/:genreId', async (req, res) => {
             try {
                 await pool.close();
                 console.log('Database connection closed');
+            } catch (err) {
+                console.error('Error closing database connection:', err);
+            }
+        }
+    }
+});
+
+// Add this new route
+router.get('/inventory', async (req, res) => {
+    let pool;
+    try {
+        pool = await sql.connect(dbConfig);
+        const data = await productQueries.getInventoryOverview(pool);
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching inventory:', error);
+        res.status(500).json({ message: 'Failed to fetch inventory' });
+    } finally {
+        if (pool) {
+            try {
+                await pool.close();
             } catch (err) {
                 console.error('Error closing database connection:', err);
             }

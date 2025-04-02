@@ -241,5 +241,15 @@ export const queryApi = {
         return response.json();
     },
 
+    getInventoryOverview: async () => {
+        const response = await fetch(`${API_BASE_URL}/products/inventory`, {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch inventory');
+        }
+        return response.json();
+    },
+
     // Add other API methods here
 }; 
