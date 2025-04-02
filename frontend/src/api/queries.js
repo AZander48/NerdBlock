@@ -32,19 +32,20 @@ async function fetchQueryData(endpoint) {
  */
 export async function registerSubscriber(subscriberData) {
     try {
-        const response = await fetch(`${API_BASE_URL}/queries/register`, {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(subscriberData)
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Registration failed');
+            throw new Error(errorData.message || 'Registration failed');
         }
-        return await response.json();
+        return response.json();
     } catch (error) {
         console.error('Error registering subscriber:', error);
         throw error;
@@ -57,19 +58,20 @@ export const queryApi = {
     getSubscriptionAnalytics: () => fetchQueryData('subscription-analytics'),
     getRevenueAnalytics: () => fetchQueryData('revenue-analytics'),
     async registerSubscriber(subscriberData) {
-        const response = await fetch(`${API_BASE_URL}/queries/register`, {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(subscriberData)
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Registration failed');
+            throw new Error(errorData.message || 'Registration failed');
         }
-        return await response.json();
+        return response.json();
     },
     async loginSubscriber(loginData) {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -109,7 +111,7 @@ export const queryApi = {
     },
 
     async createSubscriber(subscriberData) {
-        const response = await fetch(`${API_BASE_URL}/subscribers`, {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -258,20 +258,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const radioButtons = document.querySelectorAll('input[name="subscriptionType"]');
     radioButtons.forEach(radio => {
       radio.addEventListener('change', (e) => {
-        updatePrices(e.target.value);
+        const selectedType = e.target.value;
+        console.log('Radio button changed to:', selectedType); // Debug log
+        updatePrices(selectedType);
+        // Update session storage immediately when type changes
+        sessionStorage.setItem('selectedType', selectedType);
       });
     });
 
     // Initialize prices with Monthly subscription type
     updatePrices('Monthly');
 
-    // Update confirm button handler to include tax and shipping
+    // Update confirm button handler
     const confirmButton = document.getElementById('confirmButton');
     confirmButton.addEventListener('click', async () => {
       try {
+        const plan = sessionStorage.getItem('selectedPlan');
+        // Get the selected type from the radio buttons
+        const selectedType = document.querySelector('input[name="subscriptionType"]:checked').value;
+        console.log('Selected type at confirmation:', selectedType); // Debug log
+        
+        // Store the selected type and base price
+        const basePrice = selectedType === 'Annual' ? 149.99 : 15.99;
+        sessionStorage.setItem('selectedType', selectedType);
+        sessionStorage.setItem('basePrice', basePrice.toString());
+        
         const subscriptionData = {
           plan: planName,
-          type: document.querySelector('input[name="subscriptionType"]:checked').value,
+          type: selectedType, // Use the selected type from radio buttons
           userId: currentUser.SubscriberID
         };
 
@@ -280,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Store subscription details for success page
         sessionStorage.setItem('subscriptionDetails', JSON.stringify({
           plan: PLAN_DETAILS[planKey].name,
-          type: subscriptionData.type,
+          type: selectedType,
           subscriptionId: result.subscriptionId
         }));
 
@@ -289,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         window.location.href = '/subscription/success';
       } catch (error) {
-        console.error('Error creating subscription:', error);
+        console.error('Error confirming subscription:', error);
         alert('Failed to create subscription. Please try again.');
       }
     });

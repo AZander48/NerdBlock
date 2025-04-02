@@ -34,15 +34,30 @@ import { queryApi } from '/api/queries.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // Retrieve all the necessary data from session storage
+    // Retrieve and parse the data from session storage
     const plan = sessionStorage.getItem('selectedPlan');
-    const selectedType = sessionStorage.getItem('selectedType') || 'Monthly';
-    const countryId = parseInt(sessionStorage.getItem('countryId'));
-    const basePrice = parseFloat(sessionStorage.getItem('basePrice'));
+    const selectedType = sessionStorage.getItem('selectedType');
+    const countryId = parseInt(sessionStorage.getItem('countryId')) || null;
     
-    console.log('Selected plan:', plan);
-    console.log('Selected type:', selectedType);
-
+    console.log('Success page - Retrieved data:', {
+      plan,
+      selectedType,
+      countryId
+    });
+    
+    // Set base price based on type with validation
+    let basePrice;
+    if (selectedType === 'Annual') {
+      basePrice = 149.99;
+    } else if (selectedType === 'Monthly') {
+      basePrice = 15.99;
+    } else {
+      console.error('Invalid subscription type:', selectedType);
+      basePrice = 15.99; // Default to monthly if type is invalid
+    }
+    
+    console.log('Calculated base price:', basePrice);
+    
     if (!plan) {
       console.error('No plan found in session storage');
       window.location.href = '/subscription';
@@ -81,23 +96,23 @@ document.addEventListener('DOMContentLoaded', async () => {
           <ul class="space-y-2">
             <li class="flex justify-between">
               <span>Subscription Type:</span>
-              <span class="font-bold">${selectedType}</span>
+              <span class="font-bold">${selectedType} Subscription</span>
             </li>
             <li class="flex justify-between">
-              <span>Base Price:</span>
+              <span>Base Price (${selectedType === 'Annual' ? 'per year' : 'per month'}):</span>
               <span class="font-bold">$${basePrice.toFixed(2)}</span>
             </li>
             ${country ? `
               <li class="flex justify-between">
-                <span>Shipping to ${country.CountryName}</span>
+                <span>Shipping to ${country.CountryName}:</span>
                 <span class="font-bold">${shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}</span>
               </li>
               <li class="flex justify-between">
-                <span>Tax (${country.Tax}%)</span>
+                <span>Tax (${country.Tax}%):</span>
                 <span class="font-bold">$${taxAmount.toFixed(2)}</span>
               </li>
               <li class="flex justify-between text-lg font-bold border-t border-gray-600 pt-3">
-                <span>Total ${selectedType === 'Annual' ? 'per Year' : 'per Month'}</span>
+                <span>Total ${selectedType === 'Annual' ? 'per Year' : 'per Month'}:</span>
                 <span>$${total.toFixed(2)}</span>
               </li>
             ` : ''}

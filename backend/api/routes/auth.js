@@ -63,9 +63,22 @@ router.post('/login', async (req, res) => {
 // Register route
 router.post('/register', async (req, res) => {
   try {
-    const { userName, firstName, lastName, email, password } = req.body;
+    const { 
+      userName, 
+      firstName, 
+      lastName, 
+      email, 
+      password,
+      phoneNumber,
+      shippingAddress,
+      billingAddress,
+      countryId,
+      paymentType
+    } = req.body;
+
     const pool = await sql.connect(dbConfig);
     
+    // Check if email is already taken
     const existingUser = await pool.request()
       .input('email', sql.VarChar, email)
       .query('SELECT * FROM Subscriber WHERE EmailAddress = @email');
@@ -74,26 +87,62 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Check if username is already taken
+    const existingUsername = await pool.request()
+      .input('userName', sql.VarChar, userName)
+      .query('SELECT * FROM Subscriber WHERE Username = @userName');
+
+    if (existingUsername.recordset.length > 0) {
+      return res.status(400).json({ message: 'Username already taken' });
+    }
+
+    // Validate country exists
+    const countryCheck = await pool.request()
+      .input('countryId', sql.Int, countryId)
+      .query('SELECT CountryID FROM Country WHERE CountryID = @countryId');
+
+    if (countryCheck.recordset.length === 0) {
+      return res.status(400).json({ message: 'Invalid country selected' });
+    }
+
+    // Get current date for registration
+    const registrationDate = new Date().toISOString();
     
     const result = await pool.request()
       .input('userName', sql.VarChar, userName)
       .input('firstName', sql.VarChar, firstName)
       .input('lastName', sql.VarChar, lastName)
       .input('email', sql.VarChar, email)
-      .input('password', sql.VarChar, hashedPassword)
+      .input('password', sql.VarChar, password)
+      .input('phoneNumber', sql.VarChar, phoneNumber || null)
+      .input('shippingAddress', sql.VarChar, shippingAddress || null)
+      .input('billingAddress', sql.VarChar, billingAddress || null)
+      .input('countryId', sql.Int, countryId)
+      .input('paymentType', sql.VarChar, paymentType)
+      .input('registrationDate', sql.DateTime, registrationDate)
       .query(`
         INSERT INTO Subscriber 
-        (Username, FirstName, LastName, EmailAddress, Password) 
-        VALUES (@userName, @firstName, @lastName, @email, @password);
+        (Username, FirstName, LastName, EmailAddress, Password, 
+         PhoneNumber, ShippingAddress, BillingAddress, CountryID, 
+         PaymentType, DateCreated)
+        VALUES 
+        (@userName, @firstName, @lastName, @email, @password,
+         @phoneNumber, @shippingAddress, @billingAddress, @countryId,
+         @paymentType, @registrationDate);
+        
         SELECT SCOPE_IDENTITY() AS SubscriberID;
       `);
 
+    // Set session
     req.session.subscriberId = result.recordset[0].SubscriberID;
-    res.json({ message: 'Registration successful' });
+    
+    res.json({ 
+      message: 'Registration successful',
+      subscriberId: result.recordset[0].SubscriberID 
+    });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Registration failed' });
+    res.status(500).json({ message: 'Registration failed: ' + error.message });
   } finally {
     sql.close();
   }
@@ -214,7 +263,7 @@ router.post('/change-password', async (req, res) => {
 // Update profile route
 router.post('/update-profile', async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, address, city } = req.body;
+        const { firstName, lastName, email, phone, address, city, paymentType } = req.body;
         const subscriberId = req.session?.subscriberId;
 
         if (!subscriberId) {
@@ -249,6 +298,7 @@ router.post('/update-profile', async (req, res) => {
             .input('phone', sql.VarChar, phone)
             .input('address', sql.VarChar, address)
             .input('city', sql.VarChar, city)
+            .input('paymentType', sql.VarChar, paymentType)
             .query(`
                 UPDATE Subscriber 
                 SET FirstName = @firstName,
@@ -256,7 +306,8 @@ router.post('/update-profile', async (req, res) => {
                     EmailAddress = @email,
                     PhoneNumber = @phone,
                     ShippingAddress = @address,
-                    BillingAddress = @city
+                    BillingAddress = @city,
+                    PaymentType = @paymentType
                 WHERE SubscriberID = @subscriberId
             `);
 
@@ -264,6 +315,22 @@ router.post('/update-profile', async (req, res) => {
     } catch (error) {
         console.error('Update profile error:', error);
         res.status(500).json({ message: 'Failed to update profile' });
+    } finally {
+        sql.close();
+    }
+});
+
+// Get countries route
+router.get('/countries', async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .query('SELECT CountryID, CountryName FROM Country ORDER BY CountryName');
+        
+        res.json(result.recordset);
+    } catch (error) {
+        console.error('Error fetching countries:', error);
+        res.status(500).json({ message: 'Failed to fetch countries' });
     } finally {
         sql.close();
     }
