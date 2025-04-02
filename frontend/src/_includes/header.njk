@@ -6,22 +6,39 @@
                 <a href="/" class="text-2xl font-bold">NerdBlock</a>
             </div>
 
-            <!-- Admin Toggle -->
-            <div class="flex items-center space-x-2">
-                <span class="text-sm">Admin Mode</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="adminToggle" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-            </div>
+            <div class="flex items-center space-x-6">
+                <!-- Admin Toggle -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm">Admin Mode</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="adminToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
 
-            <!-- Mobile menu button -->
-            <div class="md:hidden">
-                <button id="mobile-menu-button" class="text-white hover:text-gray-300 focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                <!-- Auth Links -->
+                <div id="authLinks" class="hidden md:flex items-center space-x-4">
+                    <a href="/subscriberLogin" id="loginLink" class="text-white hover:text-gray-300 py-2 md:py-0">
+                        Subscriber Login
+                    </a>
+                    <a href="/subscriber/profile" id="profileLink" class="hidden text-white hover:text-gray-300 py-2 md:py-0">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span>Profile</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white hover:text-gray-300 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -43,13 +60,31 @@
     </nav>
 </header>
 
-<!-- Admin Toggle Script -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+<!-- Admin Toggle and Auth Script -->
+<script type="module">
+    import { queryApi } from '/api/queries.js';
+
+    document.addEventListener('DOMContentLoaded', async function() {
         const adminToggle = document.getElementById('adminToggle');
         const adminLinks = document.querySelectorAll('.admin-link');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const loginLink = document.getElementById('loginLink');
+        const profileLink = document.getElementById('profileLink');
+        const authLinks = document.getElementById('authLinks');
+
+        // Check authentication status
+        try {
+            const subscriber = await queryApi.getCurrentSubscriber();
+            loginLink.classList.add('hidden');
+            profileLink.classList.remove('hidden');
+        } catch (error) {
+            loginLink.classList.remove('hidden');
+            profileLink.classList.add('hidden');
+        }
+        
+        // Show auth links after checking status
+        authLinks.classList.remove('hidden');
 
         // Check localStorage for saved admin state
         const isAdmin = localStorage.getItem('adminMode') === 'true';

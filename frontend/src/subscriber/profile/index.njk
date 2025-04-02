@@ -1,0 +1,145 @@
+---
+title: Subscriber Profile - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Your Profile</h1>
+            <p class="text-lg text-gray-300">Manage your account details and preferences</p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-8">
+            <!-- Personal Information -->
+            <section id="personalInfo" class="bg-gray-700 rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6">Personal Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-300 mb-2">First Name</label>
+                        <p id="firstName" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Last Name</label>
+                        <p id="lastName" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Email</label>
+                        <p id="email" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Phone</label>
+                        <p id="phone" class="text-lg font-medium">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shipping Information -->
+            <section id="shippingInfo" class="bg-gray-700 rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6">Shipping Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-300 mb-2">Shipping Address</label>
+                        <p id="shippingAddress" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Billing Address</label>
+                        <p id="billingAddress" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Country</label>
+                        <p id="country" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Payment Method</label>
+                        <p id="paymentType" class="text-lg font-medium">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account Information -->
+            <section id="accountInfo" class="bg-gray-700 rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6">Account Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-300 mb-2">Username</label>
+                        <p id="username" class="text-lg font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Member Since</label>
+                        <p id="dateCreated" class="text-lg font-medium">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-4 justify-center mt-8">
+                <button id="editProfile" class="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-lg transition-colors">
+                    Edit Profile
+                </button>
+                <button id="changePassword" class="bg-gray-600 hover:bg-gray-700 px-8 py-3 rounded-lg transition-colors">
+                    Change Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+async function loadProfileData() {
+    try {
+        const subscriber = await queryApi.getCurrentSubscriber();
+        console.log('Subscriber data:', subscriber);
+
+        if (!subscriber) {
+            window.location.href = '/subscriberLogin?redirect=/subscriber/profile';
+            return;
+        }
+
+        // Format date to YYYY-MM-DD
+        const formatDate = (dateString) => {
+            if (!dateString) return 'Not provided';
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0]; // This will give you YYYY-MM-DD
+        };
+
+        // Update personal information
+        document.getElementById('firstName').textContent = subscriber.FirstName || 'Not provided';
+        document.getElementById('lastName').textContent = subscriber.LastName || 'Not provided';
+        document.getElementById('email').textContent = subscriber.EmailAddress || 'Not provided';
+        document.getElementById('phone').textContent = subscriber.PhoneNumber || 'Not provided';
+
+        // Update shipping information
+        document.getElementById('shippingAddress').textContent = subscriber.City || 'Not provided';
+        document.getElementById('billingAddress').textContent = subscriber.Address || 'Not provided';
+        document.getElementById('country').textContent = subscriber.CountryName || 'Not provided';
+        document.getElementById('paymentType').textContent = subscriber.PaymentType || 'Not provided';
+
+        // Update account information
+        document.getElementById('username').textContent = subscriber.UserName || 'Not provided';
+        document.getElementById('dateCreated').textContent = formatDate(subscriber.DateCreated);
+
+        // Add event listeners for buttons
+        document.getElementById('editProfile').addEventListener('click', () => {
+            // TODO: Implement edit profile functionality
+            alert('Edit profile functionality coming soon!');
+        });
+
+        document.getElementById('changePassword').addEventListener('click', () => {
+            // TODO: Implement change password functionality
+            alert('Change password functionality coming soon!');
+        });
+
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        alert('Failed to load profile data. Please try again later.');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadProfileData);
+</script>
+{% endblock %} 

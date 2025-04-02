@@ -107,6 +107,7 @@ router.get('/current', async (req, res) => {
             .query(`
                 SELECT TOP 1
                     s.SubscriberID,
+                    s.UserName,
                     s.FirstName,
                     s.LastName,
                     s.EmailAddress,
@@ -114,6 +115,8 @@ router.get('/current', async (req, res) => {
                     s.ShippingAddress as Address,
                     s.BillingAddress as City,
                     s.CountryID,
+                    s.PaymentType,
+                    s.DateCreated,
                     c.CountryName as CountryName,
                     c.Tax as TaxRate,
                     c.AdditionalFees as ShippingRate,
