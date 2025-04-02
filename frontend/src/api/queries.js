@@ -251,5 +251,69 @@ export const queryApi = {
         return response.json();
     },
 
+    // Employee authentication methods
+    loginEmployee: async (credentials) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/employee-auth/login`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(credentials)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Login failed');
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('Employee login error:', error);
+            throw error;
+        }
+    },
+
+    getCurrentEmployee: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/employee-auth/current`, {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    return null;
+                }
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch employee details');
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('Get current employee error:', error);
+            throw error;
+        }
+    },
+
+    logoutEmployee: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/employee-auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Logout failed');
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('Employee logout error:', error);
+            throw error;
+        }
+    },
+
     // Add other API methods here
 }; 

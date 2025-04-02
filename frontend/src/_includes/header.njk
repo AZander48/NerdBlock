@@ -7,13 +7,15 @@
             </div>
 
             <div class="flex items-center space-x-6">
-                <!-- Admin Toggle -->
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm">Admin Mode</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="adminToggle" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
+                <!-- Employee Login/Status -->
+                <div class="flex items-center space-x-4">
+                    <a href="/employee-login" id="employeeLoginLink" class="text-white hover:text-gray-300 py-2 md:py-0">
+                        Employee Login
+                    </a>
+                    <div id="employeeStatus" class="hidden">
+                        <span id="employeeName" class="text-sm text-gray-300 mr-2"></span>
+                        <button id="employeeLogout" class="text-sm text-red-400 hover:text-red-300">Logout</button>
+                    </div>
                 </div>
 
                 <!-- Auth Links -->
@@ -50,29 +52,33 @@
                 <a href="/subscription" class="text-white hover:text-gray-300 py-2 md:py-0">Subscription</a>
                 <a href="/catalog" class="text-white hover:text-gray-300 py-2 md:py-0">Catalog</a>
 
-                <!-- Admin View Links -->
-                <a href="/inventory" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Inventory</a>
-                <a href="/reports" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Reports</a>
-                <a href="/sql" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">SQL</a>
+                <!-- Employee View Links -->
+                <a href="/inventory" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Inventory</a>
+                <a href="/reports" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Reports</a>
+                <a href="/sql" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link admin-only">SQL</a>
             </div>
         </div>
     </nav>
 </header>
 
-<!-- Admin Toggle and Auth Script -->
+<!-- Employee Auth Script -->
 <script type="module">
     import { queryApi } from '/api/queries.js';
 
     document.addEventListener('DOMContentLoaded', async function() {
-        const adminToggle = document.getElementById('adminToggle');
-        const adminLinks = document.querySelectorAll('.admin-link');
+        const employeeLinks = document.querySelectorAll('.employee-link');
+        const adminOnlyLinks = document.querySelectorAll('.admin-only');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const employeeLoginLink = document.getElementById('employeeLoginLink');
+        const employeeStatus = document.getElementById('employeeStatus');
+        const employeeName = document.getElementById('employeeName');
+        const employeeLogout = document.getElementById('employeeLogout');
         const loginLink = document.getElementById('loginLink');
         const profileLink = document.getElementById('profileLink');
         const authLinks = document.getElementById('authLinks');
 
-        // Check authentication status
+        // Check subscriber authentication status
         try {
             const subscriber = await queryApi.getCurrentSubscriber();
             if (subscriber) {
@@ -83,8 +89,7 @@
                 profileLink.classList.add('hidden');
             }
         } catch (error) {
-            // Only handle actual errors here, not auth state
-            console.error('Error checking auth status:', error);
+            console.error('Error checking subscriber auth status:', error);
             loginLink.classList.remove('hidden');
             profileLink.classList.add('hidden');
         }
@@ -92,20 +97,44 @@
         // Show auth links after checking status
         authLinks.classList.remove('hidden');
 
-        // Check localStorage for saved admin state
-        const isAdmin = localStorage.getItem('adminMode') === 'true';
-        adminToggle.checked = isAdmin;
-        adminLinks.forEach(link => {
-            link.classList.toggle('hidden', !isAdmin);
-        });
+        // Check employee authentication status
+        try {
+            const employee = await queryApi.getCurrentEmployee();
+            if (employee) {
+                employeeLoginLink.classList.add('hidden');
+                employeeStatus.classList.remove('hidden');
+                employeeName.textContent = `${employee.FirstName} ${employee.LastName}`;
+                
+                // Show employee links
+                employeeLinks.forEach(link => link.classList.remove('hidden'));
+                
+                // Show admin-only links if employee is admin
+                if (employee.IsAdmin) {
+                    adminOnlyLinks.forEach(link => link.classList.remove('hidden'));
+                }
+            } else {
+                employeeLoginLink.classList.remove('hidden');
+                employeeStatus.classList.add('hidden');
+                employeeLinks.forEach(link => link.classList.add('hidden'));
+                adminOnlyLinks.forEach(link => link.classList.add('hidden'));
+            }
+        } catch (error) {
+            console.error('Error checking employee auth status:', error);
+            employeeLoginLink.classList.remove('hidden');
+            employeeStatus.classList.add('hidden');
+            employeeLinks.forEach(link => link.classList.add('hidden'));
+            adminOnlyLinks.forEach(link => link.classList.add('hidden'));
+        }
 
-        // Toggle admin mode
-        adminToggle.addEventListener('change', function() {
-            const isAdmin = this.checked;
-            localStorage.setItem('adminMode', isAdmin);
-            adminLinks.forEach(link => {
-                link.classList.toggle('hidden', !isAdmin);
-            });
+        // Handle employee logout
+        employeeLogout.addEventListener('click', async () => {
+            try {
+                await queryApi.logoutEmployee();
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout failed:', error);
+                alert('Failed to logout. Please try again.');
+            }
         });
 
         // Mobile menu toggle
