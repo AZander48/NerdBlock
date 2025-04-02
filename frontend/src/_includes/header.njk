@@ -7,6 +7,15 @@
             </div>
 
             <div class="flex items-center space-x-6">
+                <!-- Admin Toggle -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm">Admin Mode</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="adminToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
                 <!-- Auth Links -->
                 <div id="authLinks" class="hidden md:flex items-center space-x-4">
                     <a href="/subscriberLogin" id="loginLink" class="text-white hover:text-gray-300 py-2 md:py-0">
@@ -22,11 +31,6 @@
                     </a>
                 </div>
 
-                <!-- Employee Login Button -->
-                <div class="flex items-center space-x-2">
-                    <button id="employeeLoginButton" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded">Employee Login</button>
-                </div>
-
                 <!-- Mobile menu button -->
                 <div class="md:hidden">
                     <button id="mobile-menu-button" class="text-white hover:text-gray-300 focus:outline-none">
@@ -38,22 +42,10 @@
             </div>
         </div>
 
-        <!-- Employee Login Popup -->
-        <div id="employeeLoginPopup" class="hidden fixed inset-0 bg-gray-800 bg-opacity-80 flex justify-center items-center">
-            <div class="bg-gray-900 p-6 rounded shadow-lg">
-                <h2 class="text-lg font-bold text-white mb-4">Employee Login</h2>
-                <form id="employeeLoginForm" onsubmit="handleEmployeeLogin(event)">
-                    <input type="text" id="employeeUsername" placeholder="Username" required class="bg-gray-700 text-white px-2 py-1 rounded mb-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="password" id="employeePassword" placeholder="Password" required class="bg-gray-700 text-white px-2 py-1 rounded mb-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded">Login</button>
-                    <button type="button" id="closeEmployeePopup" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded">Close</button>
-                </form>
-            </div>
-        </div>
-
         <!-- Navigation Links -->
         <div id="mobile-menu" class="hidden md:block mt-4 md:mt-0">
             <div class="flex flex-col md:flex-row md:items-center md:space-x-8">
+                <!-- Customer View Links -->
                 <a href="/" class="text-white hover:text-gray-300 py-2 md:py-0">Home</a>
                 <a href="/subscription" class="text-white hover:text-gray-300 py-2 md:py-0">Subscription</a>
                 <a href="/catalog" class="text-white hover:text-gray-300 py-2 md:py-0">Catalog</a>
@@ -62,54 +54,64 @@
                 <a href="/customers" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Customers</a>
                 <a href="/inventory" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Inventory</a>
                 <a href="/reports" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Reports</a>
+                <a href="/sql" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">SQL</a>
             </div>
         </div>
     </nav>
 </header>
 
-<!-- Employee Login Script -->
-<script>
-    document.getElementById('employeeLoginButton').onclick = function() {
-        const isAdmin = localStorage.getItem('isAdmin') === 'true';
-        if (isAdmin) {
-            // Log out functionality
-            localStorage.removeItem('isAdmin'); // Clear admin state
-            document.querySelectorAll('.admin-link').forEach(link => link.classList.add('hidden'));
-            this.textContent = 'Employee Login'; // Change button text back to "Employee Login"
-            alert('Logged out successfully!');
-        } else {
-            // Show login popup
-            document.getElementById('employeeLoginPopup').classList.remove('hidden');
+<!-- Admin Toggle and Auth Script -->
+<script type="module">
+    import { queryApi } from '/api/queries.js';
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        const adminToggle = document.getElementById('adminToggle');
+        const adminLinks = document.querySelectorAll('.admin-link');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const loginLink = document.getElementById('loginLink');
+        const profileLink = document.getElementById('profileLink');
+        const authLinks = document.getElementById('authLinks');
+
+        // Check authentication status
+        try {
+            const subscriber = await queryApi.getCurrentSubscriber();
+            if (subscriber) {
+                loginLink.classList.add('hidden');
+                profileLink.classList.remove('hidden');
+            } else {
+                loginLink.classList.remove('hidden');
+                profileLink.classList.add('hidden');
+            }
+        } catch (error) {
+            // Only handle actual errors here, not auth state
+            console.error('Error checking auth status:', error);
+            loginLink.classList.remove('hidden');
+            profileLink.classList.add('hidden');
         }
-    };
+        
+        // Show auth links after checking status
+        authLinks.classList.remove('hidden');
 
-    document.getElementById('closeEmployeePopup').onclick = function() {
-        document.getElementById('employeeLoginPopup').classList.add('hidden');
-    };
+        // Check localStorage for saved admin state
+        const isAdmin = localStorage.getItem('adminMode') === 'true';
+        adminToggle.checked = isAdmin;
+        adminLinks.forEach(link => {
+            link.classList.toggle('hidden', !isAdmin);
+        });
 
-    async function handleEmployeeLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('employeeUsername').value;
-        const password = document.getElementById('employeePassword').value;
+        // Toggle admin mode
+        adminToggle.addEventListener('change', function() {
+            const isAdmin = this.checked;
+            localStorage.setItem('adminMode', isAdmin);
+            adminLinks.forEach(link => {
+                link.classList.toggle('hidden', !isAdmin);
+            });
+        });
 
-        // Hardcoded credentials
-        if (username === 'alice@example.com' && password === 'admin123') {
-            // Show admin links
-            document.querySelectorAll('.admin-link').forEach(link => link.classList.remove('hidden'));
-            localStorage.setItem('isAdmin', 'true'); // Store admin state
-            alert('Login successful!'); // You can redirect or perform other actions here
-            document.getElementById('employeeLoginPopup').classList.add('hidden');
-            document.getElementById('employeeLoginButton').textContent = 'Log Out'; // Change button text to "Log Out"
-        } else {
-            alert('Invalid credentials');
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const isAdmin = localStorage.getItem('isAdmin') === 'true';
-        if (isAdmin) {
-            document.querySelectorAll('.admin-link').forEach(link => link.classList.remove('hidden'));
-            document.getElementById('employeeLoginButton').textContent = 'Log Out'; // Change button text to "Log Out"
-        }
+        // Mobile menu toggle
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
     });
 </script>
