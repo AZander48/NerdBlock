@@ -121,80 +121,48 @@ export const queryApi = {
     },
 
     async getSubscriptionPlans() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/subscriptions/plans`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to fetch subscription plans');
-            }
-
-            return response.json();
-        } catch (error) {
-            console.error('Error fetching subscription plans:', error);
-            throw error;
+        const response = await fetch(`${API_BASE_URL}/subscriptions/plans`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch subscription plans');
         }
+        return response.json();
     },
 
     async getCurrentSubscriber() {
-        try {
-            console.log('Fetching current subscriber...');
-            const response = await fetch(`${API_BASE_URL}/subscribers/current`, {
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.status === 401) {
-                console.log('User not authenticated');
-                return null;
-            }
-
-            if (!response.ok) {
-                const error = await response.json();
-                console.error('Error response:', error);
-                throw new Error(error.message || 'Failed to fetch current subscriber');
-            }
-
-            const data = await response.json();
-            console.log('Subscriber data:', data);
-            return data;
-        } catch (error) {
-            console.error('getCurrentSubscriber error:', error);
-            throw new Error('Error fetching subscriber data');
+        const response = await fetch(`${API_BASE_URL}/subscribers/current`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch current subscriber');
         }
+        return response.json();
     },
 
     getSubscriptionTypes: () => fetchQueryData('/subscriptions/types'),
 
     async createSubscription(subscriptionData) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/subscriptions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(subscriptionData)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to create subscription');
-            }
-
-            return response.json();
-        } catch (error) {
-            console.error('Error creating subscription:', error);
-            throw error;
+        const response = await fetch(`${API_BASE_URL}/subscriptions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subscriptionData)
+        });
+        if (!response.ok) {
+            throw new Error('Failed to create subscription');
         }
+        return response.json();
+    },
+
+    async cancelSubscription(subscriptionId) {
+        const response = await fetch(`${API_BASE_URL}/subscriptions/${subscriptionId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to cancel subscription');
+        }
+        return response.json();
     },
 
     // Add other API methods here

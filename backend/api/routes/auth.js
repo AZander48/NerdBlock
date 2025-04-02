@@ -100,56 +100,49 @@ router.post('/register', async (req, res) => {
 });
 
 // Get current subscriber route
-router.get('/current', requireAuth, async (req, res) => {
-  let pool;
-  try {
-    console.log('Fetching subscriber data for ID:', req.session.subscriberId);
-    pool = await sql.connect(dbConfig);
-    
-    const result = await pool.request()
-      .input('subscriberId', sql.Int, req.session.subscriberId)
-      .query(`
-        SELECT 
-          s.SubscriberID,
-          s.Username,
-          s.FirstName,
-          s.LastName,
-          s.EmailAddress,
-          s.CountryID,
-          s.SubscriptionID,
-          s.SubscriptionStartDate,
-          c.CountryName,
-          c.Tax,
-          c.AdditionalFees
-        FROM Subscriber s
-        LEFT JOIN Country c ON s.CountryID = c.CountryID
-        WHERE s.SubscriberID = @subscriberId
-      `);
+router.get('/current', async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .query(`
+                SELECT TOP 1
+                    s.SubscriberID,
+                    s.FirstName,
+                    s.LastName,
+                    s.EmailAddress,
+                    s.PhoneNumber,
+                    s.ShippingAddress as Address,
+                    s.BillingAddress as City,
+                    s.CountryID,
+                    c.CountryName as CountryName,
+                    c.Tax as TaxRate,
+                    c.AdditionalFees as ShippingRate,
+                    s.SubscriptionID,
+                    sub.SubscriptionStartDate,
+                    st.Type as SubscriptionType,
+                    g.Name as GenreName,
+                    st.Price as SubscriptionPrice
+                FROM Subscriber s
+                LEFT JOIN Country c ON s.CountryID = c.CountryID
+                LEFT JOIN Subscriptions sub ON s.SubscriptionID = sub.SubscriptionID
+                LEFT JOIN SubscriptionTypes st ON sub.SubscriptionTypeID = st.SubscriptionTypeID
+                LEFT JOIN Genres g ON st.GenreID = g.GenreID
+                WHERE s.SubscriberID = 1
+            `);
 
-    console.log('Query result:', result);
+        console.log('Query result:', result.recordset[0]);
 
-    if (!result.recordset || result.recordset.length === 0) {
-      console.log('No subscriber found with ID:', req.session.subscriberId);
-      return res.status(404).json({ message: 'Subscriber not found' });
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'Subscriber not found' });
+        }
+
+        res.json(result.recordset[0]);
+    } catch (error) {
+        console.error('Error fetching subscriber:', error);
+        res.status(500).json({ message: 'Failed to fetch subscriber details' });
+    } finally {
+        sql.close();
     }
-
-    res.json(result.recordset[0]);
-  } catch (error) {
-    console.error('Error fetching current subscriber:', error);
-    res.status(500).json({ 
-      message: 'Error fetching subscriber data',
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  } finally {
-    if (pool) {
-      try {
-        await sql.close();
-      } catch (err) {
-        console.error('Error closing SQL connection:', err);
-      }
-    }
-  }
 });
 
 // Logout route

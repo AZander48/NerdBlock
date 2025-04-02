@@ -297,4 +297,40 @@ router.get('/debug/plans', async (req, res) => {
     }
 });
 
+// Cancel subscription
+router.delete('/:id', async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        
+        // First, get the subscriber ID for this subscription
+        const result = await pool.request()
+            .input('subscriptionId', sql.Numeric(9), req.params.id)
+            .query(`
+                SELECT SubscriberID 
+                FROM Subscriber 
+                WHERE SubscriptionID = @subscriptionId
+            `);
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'Subscription not found' });
+        }
+
+        // Update the subscriber to remove the subscription
+        await pool.request()
+            .input('subscriberId', sql.Numeric(9), result.recordset[0].SubscriberID)
+            .query(`
+                UPDATE Subscriber
+                SET SubscriptionID = NULL
+                WHERE SubscriberID = @subscriberId
+            `);
+
+        res.json({ message: 'Subscription cancelled successfully' });
+    } catch (error) {
+        console.error('Error cancelling subscription:', error);
+        res.status(500).json({ message: 'Failed to cancel subscription' });
+    } finally {
+        sql.close();
+    }
+});
+
 export default router;
