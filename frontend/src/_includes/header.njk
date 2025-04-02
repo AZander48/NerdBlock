@@ -1,0 +1,75 @@
+<header class="bg-gray-900 text-white">
+    <nav class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="/" class="text-2xl font-bold">NerdBlock</a>
+            </div>
+
+            <!-- Admin Toggle -->
+            <div class="flex items-center space-x-2">
+                <span class="text-sm">Admin Mode</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="adminToggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-white hover:text-gray-300 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:block mt-4 md:mt-0">
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-8">
+                <!-- Customer View Links -->
+                <a href="/" class="text-white hover:text-gray-300 py-2 md:py-0">Home</a>
+                <a href="/subscription" class="text-white hover:text-gray-300 py-2 md:py-0">Subscription</a>
+                <a href="/catalog" class="text-white hover:text-gray-300 py-2 md:py-0">Catalog</a>
+
+                <!-- Admin View Links -->
+                <a href="/customers" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Customers</a>
+                <a href="/inventory" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Inventory</a>
+                <a href="/reports" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">Reports</a>
+                <a href="/sql" class="text-white hover:text-gray-300 py-2 md:py-0 hidden admin-link">SQL</a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Admin Toggle Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const adminToggle = document.getElementById('adminToggle');
+        const adminLinks = document.querySelectorAll('.admin-link');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+
+        // Check localStorage for saved admin state
+        const isAdmin = localStorage.getItem('adminMode') === 'true';
+        adminToggle.checked = isAdmin;
+        adminLinks.forEach(link => {
+            link.classList.toggle('hidden', !isAdmin);
+        });
+
+        // Toggle admin mode
+        adminToggle.addEventListener('change', function() {
+            const isAdmin = this.checked;
+            localStorage.setItem('adminMode', isAdmin);
+            adminLinks.forEach(link => {
+                link.classList.toggle('hidden', !isAdmin);
+            });
+        });
+
+        // Mobile menu toggle
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+    });
+</script>

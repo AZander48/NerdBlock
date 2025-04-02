@@ -1,0 +1,152 @@
+---
+title: Product Catalog - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Product Catalog</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Browse our collection of exclusive collectibles and merchandise
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Product Categories -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Product Categories</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <h3 class="text-2xl font-bold mb-4">Horror</h3>
+          <p class="text-gray-300 mb-4">Spooky collectibles and horror-themed merchandise</p>
+          <ul class="text-left space-y-2 mb-6">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Action Figures
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Posters & Art
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Apparel
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <h3 class="text-2xl font-bold mb-4">Sci-Fi</h3>
+          <p class="text-gray-300 mb-4">Futuristic gadgets and space-themed items</p>
+          <ul class="text-left space-y-2 mb-6">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Models & Replicas
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Tech Accessories
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Collectibles
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+          <h3 class="text-2xl font-bold mb-4">Comics</h3>
+          <p class="text-gray-300 mb-4">Superhero merchandise and comic collectibles</p>
+          <ul class="text-left space-y-2 mb-6">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Comic Books
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Figures & Statues
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Apparel & Accessories
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Features -->
+    <section class="bg-gray-700 rounded-2xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold mb-8 text-center">Product Features</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Inventory Management</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Real-time stock tracking
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Automated reordering
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Stock level alerts
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Product Details</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Detailed descriptions
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              High-quality images
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Customer reviews
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,136 @@
+---
+title: Subscription Success - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">Subscription Successful!</h1>
+      <p class="text-lg mb-4 text-center">Thank you for subscribing to Nerdblock!</p>
+      
+      <div class="mb-8" id="subscriptionDetails">
+        <!-- Subscription details will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-600 rounded w-3/4 mb-4"></div>
+          <div class="h-4 bg-gray-600 rounded w-1/2"></div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <a href="/subscription" 
+           class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+          Manage Your Subscription
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Retrieve all the necessary data from session storage
+    const plan = sessionStorage.getItem('selectedPlan');
+    const selectedType = sessionStorage.getItem('selectedType') || 'Monthly';
+    const countryId = parseInt(sessionStorage.getItem('countryId'));
+    const basePrice = parseFloat(sessionStorage.getItem('basePrice'));
+    
+    console.log('Selected plan:', plan);
+    console.log('Selected type:', selectedType);
+
+    if (!plan) {
+      console.error('No plan found in session storage');
+      window.location.href = '/subscription';
+      return;
+    }
+
+    // Get subscription types data to get the correct price
+    const [subscriptionTypes, countries] = await Promise.all([
+      queryApi.getSubscriptionTypes(),
+      queryApi.getCountries()
+    ]);
+    
+    console.log('Subscription types:', subscriptionTypes);
+    
+    const country = countries.find(c => c.CountryID === countryId);
+    const shippingFee = country?.AdditionalFees || 0;
+    const taxAmount = (basePrice * (country?.Tax || 0)) / 100;
+    const total = basePrice + shippingFee + taxAmount;
+
+    const subscriptionDetailsElement = document.getElementById('subscriptionDetails');
+    
+    // Find the matching genre data (case-insensitive)
+    const genreData = Object.entries(subscriptionTypes).find(([genre]) => 
+      genre.toLowerCase() === plan.toLowerCase()
+    )?.[1];
+
+    if (genreData) {
+      const price = genreData.types[selectedType]?.price || 
+        (selectedType === 'Monthly' ? 15.99 : 149.99);
+
+      subscriptionDetailsElement.innerHTML = `
+        <h2 class="text-2xl font-bold mb-2">${plan} Block</h2>
+        <p class="text-gray-300 mb-4">Monthly box of ${plan.toLowerCase()}-themed collectibles and exclusive items</p>
+        <div class="bg-gray-600 rounded-lg p-4 mb-4">
+          <p class="text-lg mb-2">Subscription Details:</p>
+          <ul class="space-y-2">
+            <li class="flex justify-between">
+              <span>Subscription Type:</span>
+              <span class="font-bold">${selectedType}</span>
+            </li>
+            <li class="flex justify-between">
+              <span>Base Price:</span>
+              <span class="font-bold">$${basePrice.toFixed(2)}</span>
+            </li>
+            ${country ? `
+              <li class="flex justify-between">
+                <span>Shipping to ${country.CountryName}</span>
+                <span class="font-bold">${shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}</span>
+              </li>
+              <li class="flex justify-between">
+                <span>Tax (${country.Tax}%)</span>
+                <span class="font-bold">$${taxAmount.toFixed(2)}</span>
+              </li>
+              <li class="flex justify-between text-lg font-bold border-t border-gray-600 pt-3">
+                <span>Total ${selectedType === 'Annual' ? 'per Year' : 'per Month'}</span>
+                <span>$${total.toFixed(2)}</span>
+              </li>
+            ` : ''}
+          </ul>
+        </div>
+        <p class="text-lg">Your subscription will start shortly. Thank you for choosing Nerdblock!</p>
+      `;
+    } else {
+      console.error('Invalid plan details:', plan);
+      subscriptionDetailsElement.innerHTML = `
+        <div class="bg-yellow-600 text-white p-4 rounded-lg">
+          <p>Your subscription has been created successfully, but we couldn't display the details. 
+          Please check your account settings for more information.</p>
+        </div>
+      `;
+    }
+
+    // Clear the session storage after displaying the success message
+    sessionStorage.removeItem('selectedPlan');
+    sessionStorage.removeItem('selectedType');
+    sessionStorage.removeItem('countryId');
+    sessionStorage.removeItem('basePrice');
+
+  } catch (error) {
+    console.error('Error in success page:', error);
+    const subscriptionDetailsElement = document.getElementById('subscriptionDetails');
+    subscriptionDetailsElement.innerHTML = `
+      <div class="bg-red-600 text-white p-4 rounded-lg">
+        <p>An error occurred while loading your subscription details. 
+        Please check your account settings for confirmation of your subscription.</p>
+      </div>
+    `;
+  }
+});
+</script>
+{% endblock %}
