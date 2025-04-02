@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Retrieve all the necessary data from session storage
     const plan = sessionStorage.getItem('selectedPlan');
     const selectedType = sessionStorage.getItem('selectedType') || 'Monthly';
+    const countryId = parseInt(sessionStorage.getItem('countryId'));
+    const basePrice = parseFloat(sessionStorage.getItem('basePrice'));
+    
     console.log('Selected plan:', plan);
     console.log('Selected type:', selectedType);
 
@@ -47,8 +50,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Get subscription types data to get the correct price
-    const subscriptionTypes = await queryApi.getSubscriptionTypes();
+    const [subscriptionTypes, countries] = await Promise.all([
+      queryApi.getSubscriptionTypes(),
+      queryApi.getCountries()
+    ]);
+    
     console.log('Subscription types:', subscriptionTypes);
+    
+    const country = countries.find(c => c.CountryID === countryId);
+    const shippingFee = country?.AdditionalFees || 0;
+    const taxAmount = (basePrice * (country?.Tax || 0)) / 100;
+    const total = basePrice + shippingFee + taxAmount;
 
     const subscriptionDetailsElement = document.getElementById('subscriptionDetails');
     
@@ -72,17 +84,23 @@ document.addEventListener('DOMContentLoaded', async () => {
               <span class="font-bold">${selectedType}</span>
             </li>
             <li class="flex justify-between">
-              <span>Price:</span>
-              <span class="font-bold">$${price.toFixed(2)}</span>
+              <span>Base Price:</span>
+              <span class="font-bold">$${basePrice.toFixed(2)}</span>
             </li>
-            <li class="flex justify-between">
-              <span>Shipping to</span>
-              <span class="font-bold">${shippingCountry ? COUNTRIES[shippingCountry] : 'Select country'}</span>
-            </li>
-            <li class="flex justify-between">
-              <span>Shipping Fee</span>
-              <span class="font-bold">${shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}</span>
-            </li>
+            ${country ? `
+              <li class="flex justify-between">
+                <span>Shipping to ${country.CountryName}</span>
+                <span class="font-bold">${shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}</span>
+              </li>
+              <li class="flex justify-between">
+                <span>Tax (${country.Tax}%)</span>
+                <span class="font-bold">$${taxAmount.toFixed(2)}</span>
+              </li>
+              <li class="flex justify-between text-lg font-bold border-t border-gray-600 pt-3">
+                <span>Total ${selectedType === 'Annual' ? 'per Year' : 'per Month'}</span>
+                <span>$${total.toFixed(2)}</span>
+              </li>
+            ` : ''}
           </ul>
         </div>
         <p class="text-lg">Your subscription will start shortly. Thank you for choosing Nerdblock!</p>
@@ -100,43 +118,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Clear the session storage after displaying the success message
     sessionStorage.removeItem('selectedPlan');
     sessionStorage.removeItem('selectedType');
-
-    // Add shipping info to the display
-    const countryId = parseInt(sessionStorage.getItem('countryId'));
-    const basePrice = parseFloat(sessionStorage.getItem('basePrice'));
-    const selectedType = sessionStorage.getItem('selectedType');
-
-    // Fetch country data
-    const countries = await queryApi.getCountries();
-    const country = countries.find(c => c.CountryID === countryId);
-
-    // Calculate amounts
-    const shippingFee = country.AdditionalFees;
-    const taxAmount = (basePrice * country.Tax) / 100;
-    const total = basePrice + shippingFee + taxAmount;
-
-    // Add to the subscription details display:
-    ${country ? `
-      <li class="flex justify-between">
-        <span>Base Price</span>
-        <span class="font-bold">$${basePrice.toFixed(2)}</span>
-      </li>
-      <li class="flex justify-between">
-        <span>Shipping to ${country.CountryName}</span>
-        <span class="font-bold">${shippingFee === 0 ? 'Free' : `$${shippingFee.toFixed(2)}`}</span>
-      </li>
-      <li class="flex justify-between">
-        <span>Tax (${country.Tax}%)</span>
-        <span class="font-bold">$${taxAmount.toFixed(2)}</span>
-      </li>
-      <li class="flex justify-between text-lg font-bold border-t border-gray-600 pt-3">
-        <span>Total ${selectedType === 'Annual' ? 'per Year' : 'per Month'}</span>
-        <span>$${total.toFixed(2)}</span>
-      </li>
-    ` : ''}
+    sessionStorage.removeItem('countryId');
+    sessionStorage.removeItem('basePrice');
 
   } catch (error) {
     console.error('Error in success page:', error);
+    const subscriptionDetailsElement = document.getElementById('subscriptionDetails');
     subscriptionDetailsElement.innerHTML = `
       <div class="bg-red-600 text-white p-4 rounded-lg">
         <p>An error occurred while loading your subscription details. 

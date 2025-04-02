@@ -9,49 +9,58 @@ router.post('/', async (req, res) => {
     const { plan, type, userId } = req.body;
 
     try {
+        console.log('Creating subscription:', { plan, type, userId });
         const pool = await sql.connect(dbConfig);
         
-        // First, get the GenreID based on the plan name (e.g., 'Horror', 'Science Fiction', etc.)
-        const genreResult = await pool.request()
+        // First, get the SubscriptionTypeID based on the plan name and type
+        const subscriptionTypeResult = await pool.request()
             .input('plan', sql.VarChar, plan)
-            .query(`SELECT GenreID FROM Genres WHERE Name = @plan`);
-
-        if (genreResult.recordset.length === 0) {
-            return res.status(400).json({ message: 'Invalid subscription plan' });
-        }
-
-        const genreId = genreResult.recordset[0].GenreID;
-
-        // Get the SubscriptionID based on the GenreID and type (Monthly/Annual)
-        const subscriptionResult = await pool.request()
-            .input('genreId', sql.Int, genreId)
             .input('type', sql.VarChar, type)
             .query(`
-                SELECT SubscriptionID 
-                FROM Subscriptions 
-                WHERE GenreID = @genreId AND Type = @type
+                SELECT st.SubscriptionTypeID
+                FROM SubscriptionTypes st
+                INNER JOIN Genres g ON st.GenreID = g.GenreID
+                WHERE g.Name = @plan AND st.Type = @type
             `);
 
-        if (subscriptionResult.recordset.length === 0) {
-            return res.status(400).json({ message: 'Invalid subscription type' });
+        console.log('Subscription type result:', subscriptionTypeResult.recordset);
+
+        if (subscriptionTypeResult.recordset.length === 0) {
+            return res.status(400).json({ message: 'Invalid subscription plan or type' });
         }
 
-        const subscriptionId = subscriptionResult.recordset[0].SubscriptionID;
+        const subscriptionTypeId = subscriptionTypeResult.recordset[0].SubscriptionTypeID;
+
+        // Create a new subscription in the Subscriptions table
+        const newSubscription = await pool.request()
+            .input('subscriptionTypeId', sql.Numeric(9), subscriptionTypeId)
+            .input('startDate', sql.DateTime, new Date())
+            .query(`
+                INSERT INTO Subscriptions (
+                    SubscriptionTypeID,
+                    SubscriptionStartDate
+                ) VALUES (
+                    @subscriptionTypeId,
+                    @startDate
+                );
+                SELECT SCOPE_IDENTITY() as SubscriptionID;
+            `);
+
+        const subscriptionId = newSubscription.recordset[0].SubscriptionID;
 
         // Update the Subscriber table with the new SubscriptionID
-        const result = await pool.request()
-            .input('subscriptionId', sql.Int, subscriptionId)
+        await pool.request()
+            .input('subscriptionId', sql.Numeric(9), subscriptionId)
             .input('userId', sql.Int, userId)
             .query(`
                 UPDATE Subscriber
-                SET SubscriptionID = @subscriptionId, 
-                    SubscriptionStartDate = GETDATE()
+                SET SubscriptionID = @subscriptionId
                 WHERE SubscriberID = @userId
             `);
 
         res.status(201).json({ 
             message: 'Subscription created successfully', 
-            subscriptionId: subscriptionId 
+            subscriptionId: subscriptionId
         });
     } catch (error) {
         console.error('Error creating subscription:', error);
@@ -67,34 +76,28 @@ router.post('/', async (req, res) => {
 // GET /api/subscriptions/types
 router.get('/types', async (req, res) => {
     try {
-        console.log('Attempting to connect to database...');
+        console.log('Fetching subscription types...');
         const pool = await sql.connect(dbConfig);
         
-        console.log('Executing query...');
         const result = await pool.request()
             .query(`
                 SELECT 
                     g.GenreID,
                     g.Name as GenreName,
-                    s.Type as SubscriptionType,
-                    s.Price,
-                    s.SubscriptionID
+                    st.Type as SubscriptionType,
+                    st.Price,
+                    st.SubscriptionTypeID
                 FROM Genres g
-                INNER JOIN Subscriptions s ON g.GenreID = s.GenreID
+                INNER JOIN SubscriptionTypes st ON g.GenreID = st.GenreID
+                ORDER BY g.Name, st.Type
             `);
 
-        console.log('Query result:', result);
+        console.log('Query result:', result.recordset);
 
-        if (!result.recordset) {
-            console.log('No recordset found in result');
-            throw new Error('No data returned from query');
-        }
-
-        // Transform the data into a more useful structure
+        // Transform the data into the expected structure
         const subscriptionTypes = {};
         
         result.recordset.forEach(row => {
-            console.log('Processing row:', row);
             if (!subscriptionTypes[row.GenreName]) {
                 subscriptionTypes[row.GenreName] = {
                     name: row.GenreName,
@@ -108,20 +111,14 @@ router.get('/types', async (req, res) => {
             };
         });
 
-        console.log('Final subscription types:', subscriptionTypes);
+        console.log('Transformed data:', subscriptionTypes);
         res.json(subscriptionTypes);
     } catch (error) {
-        console.error('Detailed error in /types route:', {
-            message: error.message,
-            stack: error.stack,
-            sqlState: error.sqlState,
-            code: error.code
-        });
-        
+        console.error('Error fetching subscription types:', error);
         res.status(500).json({ 
             message: 'Failed to fetch subscription types', 
             error: error.message,
-            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     } finally {
         try {

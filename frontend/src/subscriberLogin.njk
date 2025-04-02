@@ -51,6 +51,11 @@ async function handleFormSubmit(event) {
         password: formData.get('password')
     };
 
+    console.log('Attempting login with:', { 
+        identifier: loginData.identifier,
+        passwordLength: loginData.password.length 
+    });
+
     try {
         const response = await queryApi.loginSubscriber(loginData);
         console.log('Login successful:', response);

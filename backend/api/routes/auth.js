@@ -17,55 +17,46 @@ const requireAuth = (req, res, next) => {
 router.post('/login', async (req, res) => {
   try {
     const { identifier, password } = req.body;
-    console.log('Login attempt for:', identifier); // Debug log
+    console.log('Login attempt for:', identifier);
     
     const pool = await sql.connect(dbConfig);
     
+    // Check if the user exists with direct password comparison
     const result = await pool.request()
       .input('identifier', sql.VarChar, identifier)
+      .input('password', sql.VarChar, password)  // Add password as input
       .query(`
-        SELECT SubscriberID, Username, Password, EmailAddress
+        SELECT SubscriberID, Username, EmailAddress 
         FROM Subscriber 
-        WHERE EmailAddress = @identifier OR Username = @identifier
+        WHERE (EmailAddress = @identifier OR Username = @identifier)
+        AND Password = @password
       `);
     
-    console.log('Query result:', result.recordset); // Debug log
+    console.log('Query result:', result.recordset);
 
     if (!result.recordset || result.recordset.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const subscriber = result.recordset[0];
-    const validPassword = await bcrypt.compare(password, subscriber.Password);
-
-    if (!validPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
+    
     // Set session
     req.session.subscriberId = subscriber.SubscriberID;
     
-    // Return success without sensitive data
+    // Return success
     res.json({
       message: 'Login successful',
       user: {
         id: subscriber.SubscriberID,
-        email: subscriber.Email,
+        email: subscriber.EmailAddress,
         username: subscriber.Username
       }
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
-      message: 'Login failed', 
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
-    });
+    res.status(500).json({ message: 'Login failed', error: error.message });
   } finally {
-    try {
-      await sql.close();
-    } catch (err) {
-      console.error('Error closing SQL connection:', err);
-    }
+    sql.close();
   }
 });
 
@@ -77,7 +68,7 @@ router.post('/register', async (req, res) => {
     
     const existingUser = await pool.request()
       .input('email', sql.VarChar, email)
-      .query('SELECT * FROM Subscriber WHERE Email = @email');
+      .query('SELECT * FROM Subscriber WHERE EmailAddress = @email');
 
     if (existingUser.recordset.length > 0) {
       return res.status(400).json({ message: 'Email already registered' });
@@ -93,7 +84,7 @@ router.post('/register', async (req, res) => {
       .input('password', sql.VarChar, hashedPassword)
       .query(`
         INSERT INTO Subscriber 
-        (Username, FirstName, LastName, Email, Password) 
+        (Username, FirstName, LastName, EmailAddress, Password) 
         VALUES (@userName, @firstName, @lastName, @email, @password);
         SELECT SCOPE_IDENTITY() AS SubscriberID;
       `);
@@ -123,7 +114,7 @@ router.get('/current', requireAuth, async (req, res) => {
           s.Username,
           s.FirstName,
           s.LastName,
-          s.Email,
+          s.EmailAddress,
           s.CountryID,
           s.SubscriptionID,
           s.SubscriptionStartDate,

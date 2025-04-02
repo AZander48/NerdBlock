@@ -1,7 +1,6 @@
 import express from 'express';
 import sql from 'mssql';
 import { dbConfig } from '../config/database.js';
-import countriesRouter from './countries.js';
 
 const router = express.Router();
 

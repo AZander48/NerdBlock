@@ -52,8 +52,8 @@ export async function registerSubscriber(subscriberData) {
 }
 
 export const queryApi = {
-    getCountries: () => fetchQueryData('countries'),
-    getProducts: () => fetchQueryData('products'),
+    getCountries: () => fetchQueryData('/countries'),
+    getProducts: () => fetchQueryData('/products'),
     getSubscriptionAnalytics: () => fetchQueryData('subscription-analytics'),
     getRevenueAnalytics: () => fetchQueryData('revenue-analytics'),
     async registerSubscriber(subscriberData) {
@@ -172,8 +172,29 @@ export const queryApi = {
         }
     },
 
-    async getSubscriptionTypes() {
-        return await fetchQueryData('/subscriptions/types');
+    getSubscriptionTypes: () => fetchQueryData('/subscriptions/types'),
+
+    async createSubscription(subscriptionData) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/subscriptions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(subscriptionData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to create subscription');
+            }
+
+            return response.json();
+        } catch (error) {
+            console.error('Error creating subscription:', error);
+            throw error;
+        }
     },
 
     // Add other API methods here

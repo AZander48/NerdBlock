@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         `).join('')}
                     </ul>
                     <button 
-                        data-plan="${plan.slug}"
+                        data-plan="${plan.name.toLowerCase()}"
                         data-genre-id="${plan.id}"
                         data-plan-name="${plan.name}"
                         class="subscribe-button bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full transition-colors">

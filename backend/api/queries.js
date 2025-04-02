@@ -3,6 +3,7 @@ import authRoutes from './routes/auth.js';
 import analyticsRoutes from './routes/analytics.js';
 import productsRoutes from './routes/products.js';
 import subscriptionsRoutes from './routes/subscriptions.js';
+import countriesRoutes from './routes/countries.js';
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ router.use('/subscribers', authRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/products', productsRoutes);
 router.use('/subscriptions', subscriptionsRoutes);
+router.use('/countries', countriesRoutes);
 
 // Export the queryApi object for frontend use
 export const queryApi = {
