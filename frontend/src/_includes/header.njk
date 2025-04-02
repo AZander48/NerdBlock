@@ -76,9 +76,16 @@
         // Check authentication status
         try {
             const subscriber = await queryApi.getCurrentSubscriber();
-            loginLink.classList.add('hidden');
-            profileLink.classList.remove('hidden');
+            if (subscriber) {
+                loginLink.classList.add('hidden');
+                profileLink.classList.remove('hidden');
+            } else {
+                loginLink.classList.remove('hidden');
+                profileLink.classList.add('hidden');
+            }
         } catch (error) {
+            // Only handle actual errors here, not auth state
+            console.error('Error checking auth status:', error);
             loginLink.classList.remove('hidden');
             profileLink.classList.add('hidden');
         }

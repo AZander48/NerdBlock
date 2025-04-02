@@ -72,7 +72,7 @@ export const queryApi = {
         return await response.json();
     },
     async loginSubscriber(loginData) {
-        const response = await fetch(`${API_BASE_URL}/subscribers/login`, {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -129,10 +129,24 @@ export const queryApi = {
     },
 
     async getCurrentSubscriber() {
-        const response = await fetch(`${API_BASE_URL}/subscribers/current`);
+        const response = await fetch(`${API_BASE_URL}/auth/current`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        // Special handling for 401 (not logged in)
+        if (response.status === 401) {
+            return null; // Return null instead of throwing error for not logged in
+        }
+
+        // Handle other errors
         if (!response.ok) {
             throw new Error('Failed to fetch current subscriber');
         }
+
         return response.json();
     },
 

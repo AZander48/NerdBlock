@@ -102,8 +102,15 @@ router.post('/register', async (req, res) => {
 // Get current subscriber route
 router.get('/current', async (req, res) => {
     try {
+        const subscriberId = req.session?.subscriberId;
+        console.log('Subscriber ID:', req.session?.subscriberId);
+        if (!subscriberId) {
+            console.log('No subscriber ID in session');
+            return res.status(401).json({ message: 'Not logged in' });
+        }
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
+            .input('subscriberId', sql.Int, subscriberId)
             .query(`
                 SELECT TOP 1
                     s.SubscriberID,
@@ -130,7 +137,7 @@ router.get('/current', async (req, res) => {
                 LEFT JOIN Subscriptions sub ON s.SubscriptionID = sub.SubscriptionID
                 LEFT JOIN SubscriptionTypes st ON sub.SubscriptionTypeID = st.SubscriptionTypeID
                 LEFT JOIN Genres g ON st.GenreID = g.GenreID
-                WHERE s.SubscriberID = 1
+                WHERE s.SubscriberID = @subscriberId
             `);
 
         console.log('Query result:', result.recordset[0]);

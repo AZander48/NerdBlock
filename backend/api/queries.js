@@ -8,7 +8,7 @@ import countriesRoutes from './routes/countries.js';
 const router = express.Router();
 
 // Mount the routes
-router.use('/subscribers', authRoutes);
+router.use('/auth', authRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/products', productsRoutes);
 router.use('/subscriptions', subscriptionsRoutes);
@@ -18,7 +18,7 @@ router.use('/countries', countriesRoutes);
 export const queryApi = {
     createSubscriber: (subscriberData) => createSubscriber(subscriberData),
     getCurrentSubscriber: async () => {
-        const response = await fetch('/api/subscribers/current');
+        const response = await fetch('/api/auth/current');
         if (!response.ok) return null;
         return response.json();
     },

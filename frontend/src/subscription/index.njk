@@ -99,14 +99,19 @@ async function loadCurrentSubscription() {
     
     const subscriptionDetails = document.getElementById('subscriptionDetails');
     
-    if (!currentUser || !currentUser.SubscriptionID) {
-      subscriptionDetails.innerHTML = `
-        <div class="text-gray-300">
-          <p class="mb-4">You don't have an active subscription.</p>
-          <p>Choose from our available plans below to get started!</p>
-        </div>
-      `;
-      return;
+    if (!currentUser) {
+        window.location.href = '/subscriberLogin?redirect=/subscription';
+        return;
+    }
+
+    if (!currentUser.SubscriptionID) {
+        subscriptionDetails.innerHTML = `
+            <div class="text-gray-300">
+                <p class="mb-4">You don't have an active subscription.</p>
+                <p>Choose from our available plans below to get started!</p>
+            </div>
+        `;
+        return;
     }
 
     // Format date to be more readable
