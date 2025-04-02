@@ -165,4 +165,108 @@ router.post('/logout', (req, res) => {
   });
 });
 
+// Change password route
+router.post('/change-password', async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const subscriberId = req.session?.subscriberId;
+
+        if (!subscriberId) {
+            return res.status(401).json({ message: 'Not logged in' });
+        }
+
+        const pool = await sql.connect(dbConfig);
+
+        // Verify current password
+        const verifyResult = await pool.request()
+            .input('subscriberId', sql.Int, subscriberId)
+            .input('currentPassword', sql.VarChar, currentPassword)
+            .query(`
+                SELECT SubscriberID 
+                FROM Subscriber 
+                WHERE SubscriberID = @subscriberId 
+                AND Password = @currentPassword
+            `);
+
+        if (verifyResult.recordset.length === 0) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+
+        // Update password
+        await pool.request()
+            .input('subscriberId', sql.Int, subscriberId)
+            .input('newPassword', sql.VarChar, newPassword)
+            .query(`
+                UPDATE Subscriber 
+                SET Password = @newPassword 
+                WHERE SubscriberID = @subscriberId
+            `);
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: 'Failed to change password' });
+    } finally {
+        sql.close();
+    }
+});
+
+// Update profile route
+router.post('/update-profile', async (req, res) => {
+    try {
+        const { firstName, lastName, email, phone, address, city } = req.body;
+        const subscriberId = req.session?.subscriberId;
+
+        if (!subscriberId) {
+            return res.status(401).json({ message: 'Not logged in' });
+        }
+
+        const pool = await sql.connect(dbConfig);
+
+        // Check if email is already taken by another user
+        if (email) {
+            const emailCheck = await pool.request()
+                .input('email', sql.VarChar, email)
+                .input('subscriberId', sql.Int, subscriberId)
+                .query(`
+                    SELECT SubscriberID 
+                    FROM Subscriber 
+                    WHERE EmailAddress = @email 
+                    AND SubscriberID != @subscriberId
+                `);
+
+            if (emailCheck.recordset.length > 0) {
+                return res.status(400).json({ message: 'Email is already in use' });
+            }
+        }
+
+        // Update profile
+        await pool.request()
+            .input('subscriberId', sql.Int, subscriberId)
+            .input('firstName', sql.VarChar, firstName)
+            .input('lastName', sql.VarChar, lastName)
+            .input('email', sql.VarChar, email)
+            .input('phone', sql.VarChar, phone)
+            .input('address', sql.VarChar, address)
+            .input('city', sql.VarChar, city)
+            .query(`
+                UPDATE Subscriber 
+                SET FirstName = @firstName,
+                    LastName = @lastName,
+                    EmailAddress = @email,
+                    PhoneNumber = @phone,
+                    ShippingAddress = @address,
+                    BillingAddress = @city
+                WHERE SubscriberID = @subscriberId
+            `);
+
+        res.json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ message: 'Failed to update profile' });
+    } finally {
+        sql.close();
+    }
+});
+
 export default router; 

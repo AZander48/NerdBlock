@@ -94,6 +94,10 @@ export const queryApi = {
     async logoutSubscriber() {
         const response = await fetch(`${API_BASE_URL}/auth/logout`, {
             method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
 
         if (!response.ok) {
@@ -176,6 +180,42 @@ export const queryApi = {
         if (!response.ok) {
             throw new Error('Failed to cancel subscription');
         }
+        return response.json();
+    },
+
+    async changePassword(passwordData) {
+        const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(passwordData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to change password');
+        }
+
+        return response.json();
+    },
+
+    async updateProfile(profileData) {
+        const response = await fetch(`${API_BASE_URL}/auth/update-profile`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(profileData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update profile');
+        }
+
         return response.json();
     },
 
