@@ -27,12 +27,12 @@ INSERT INTO Stores (City, StreetAddress, PostalCode, PhoneNumber) VALUES
 ('Calgary', '654 17 Ave SW', 'T2S0B5', '4035554321'),
 ('Ottawa', '987 Bank St', 'K1S3W7', '6135559876');
 --Products
-INSERT INTO Products (Name, Description, Price) VALUES
-('Magic Wand', 'A wand with magical properties', 29.99),
-('Laser Sword', 'A futuristic sword with laser blades', 99.99),
-('Mystery Box', 'A surprise box with unknown items', 19.99),
-('VR Headset', 'Virtual reality headset for gaming', 199.99),
-('Gaming Mouse', 'Ergonomic gaming mouse with RGB', 49.99);
+INSERT INTO Products (Name, Description, Price, GenreID) VALUES
+('Magic Wand', 'A wand with magical properties', 29.99, 1),
+('Laser Sword', 'A futuristic sword with laser blades', 99.99, 2),
+('Mystery Box', 'A surprise box with unknown items', 19.99, 3),
+('VR Headset', 'Virtual reality headset for gaming', 199.99, 4),
+('Gaming Mouse', 'Ergonomic gaming mouse with RGB', 49.99, 5);
 --Employees
 INSERT INTO Employees (StoreID, Password, FirstName, LastName, PhoneNumber, EmailAddress, DateJoined, IsAdmin, IsStoreOwner) VALUES
 ( 1, 'admin123', 'Alice', 'Johnson', '4165551111', 'alice@example.com', '2023-01-15', 1, 0),

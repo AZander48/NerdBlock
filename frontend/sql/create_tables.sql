@@ -53,7 +53,8 @@ CREATE TABLE Products (
     ProductID NUMERIC(9) IDENTITY(1,1) PRIMARY KEY,
     Name VARCHAR(30),
     Description VARCHAR(150),
-    Price DECIMAL(9,2)
+    Price DECIMAL(9,2),
+    GenreID NUMERIC(9) FOREIGN KEY REFERENCES Genres(GenreID)
 );
 
 CREATE TABLE Employees (

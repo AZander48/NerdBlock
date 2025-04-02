@@ -221,5 +221,25 @@ export const queryApi = {
         return response.json();
     },
 
+    async getProductsByGenre(genreId) {
+        const response = await fetch(`${API_BASE_URL}/products/by-genre/${genreId}`, {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+        return response.json();
+    },
+
+    async getAllGenres() {
+        const response = await fetch(`${API_BASE_URL}/products/genres`, {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch genres');
+        }
+        return response.json();
+    },
+
     // Add other API methods here
 }; 

@@ -17,136 +17,100 @@ title: Product Catalog - Nerdblock
     <!-- Product Categories -->
     <section class="mb-16">
       <h2 class="text-3xl font-bold mb-8 text-center">Product Categories</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <h3 class="text-2xl font-bold mb-4">Horror</h3>
-          <p class="text-gray-300 mb-4">Spooky collectibles and horror-themed merchandise</p>
-          <ul class="text-left space-y-2 mb-6">
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Action Figures
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Posters & Art
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Apparel
-            </li>
-          </ul>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <h3 class="text-2xl font-bold mb-4">Sci-Fi</h3>
-          <p class="text-gray-300 mb-4">Futuristic gadgets and space-themed items</p>
-          <ul class="text-left space-y-2 mb-6">
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Models & Replicas
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Tech Accessories
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Collectibles
-            </li>
-          </ul>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <h3 class="text-2xl font-bold mb-4">Comics</h3>
-          <p class="text-gray-300 mb-4">Superhero merchandise and comic collectibles</p>
-          <ul class="text-left space-y-2 mb-6">
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Comic Books
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Figures & Statues
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Apparel & Accessories
-            </li>
-          </ul>
+      <div id="genreCategories" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Categories will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-48 bg-gray-700 rounded-2xl"></div>
         </div>
       </div>
     </section>
 
-    <!-- Product Features -->
-    <section class="bg-gray-700 rounded-2xl shadow-lg p-8">
-      <h2 class="text-3xl font-bold mb-8 text-center">Product Features</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h3 class="text-xl font-semibold mb-4">Inventory Management</h3>
-          <ul class="space-y-2">
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Real-time stock tracking
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Automated reordering
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Stock level alerts
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="text-xl font-semibold mb-4">Product Details</h3>
-          <ul class="space-y-2">
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Detailed descriptions
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              High-quality images
-            </li>
-            <li class="flex items-center">
-              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Customer reviews
-            </li>
-          </ul>
-        </div>
+    <!-- Product List -->
+    <section id="productList" class="hidden bg-gray-700 rounded-2xl shadow-lg p-8">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold" id="selectedGenreTitle">Products</h2>
+        <button onclick="closeProductList()" class="text-gray-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="productGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Products will be populated by JavaScript -->
       </div>
     </section>
   </div>
 </div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+let currentGenre = null;
+
+async function loadGenres() {
+    try {
+        const genres = await queryApi.getAllGenres();
+        const genreCategoriesDiv = document.getElementById('genreCategories');
+        
+        genreCategoriesDiv.innerHTML = genres.map(genre => `
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center cursor-pointer hover:bg-gray-600 transition duration-200"
+                 onclick="showProducts(${genre.GenreID}, '${genre.GenreName}')">
+                <h3 class="text-2xl font-bold mb-4">${genre.GenreName}</h3>
+                <p class="text-gray-300 mb-4">${genre.GenreDescription}</p>
+                <p class="text-sm text-purple-400">${genre.ProductCount} products available</p>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading genres:', error);
+        alert('Failed to load product categories. Please try again later.');
+    }
+}
+
+window.showProducts = async function(genreId, genreName) {
+    try {
+        currentGenre = genreId;
+        const products = await queryApi.getProductsByGenre(genreId);
+        
+        const productList = document.getElementById('productList');
+        const productGrid = document.getElementById('productGrid');
+        const selectedGenreTitle = document.getElementById('selectedGenreTitle');
+        
+        selectedGenreTitle.textContent = `${genreName} Products`;
+        productList.classList.remove('hidden');
+        
+        productGrid.innerHTML = products.map(product => `
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                ${product.ImageURL ? `
+                    <img src="${product.ImageURL}" alt="${product.ProductName}" 
+                         class="w-full h-48 object-cover">
+                ` : `
+                    <div class="w-full h-48 bg-gray-700 flex items-center justify-center">
+                        <span class="text-gray-500">No image available</span>
+                    </div>
+                `}
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-2">${product.ProductName}</h3>
+                    <p class="text-gray-400 text-sm mb-3">${product.Description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-bold">$${product.Price.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        productList.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+        console.error('Error loading products:', error);
+        alert('Failed to load products. Please try again later.');
+    }
+}
+
+window.closeProductList = function() {
+    const productList = document.getElementById('productList');
+    productList.classList.add('hidden');
+}
+
+// Load genres when the page loads
+document.addEventListener('DOMContentLoaded', loadGenres);
+</script>
 {% endblock %} 
