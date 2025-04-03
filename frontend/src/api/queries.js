@@ -318,5 +318,41 @@ export const queryApi = {
     // Add these new methods
     getReportSummary: () => fetchQueryData('/reports/summary'),
     getShippingReports: () => fetchQueryData('/reports/shipping'),
-    getTransferReports: () => fetchQueryData('/reports/transfers')
+    getTransferReports: () => fetchQueryData('/reports/transfers'),
+
+    getAllProducts: async () => {
+        const response = await fetch(`${API_BASE_URL}/products/all`, {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+        return response.json();
+    },
+
+    addInventoryItem: async (inventoryData) => {
+        const response = await fetch(`${API_BASE_URL}/products/inventory`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(inventoryData)
+        });
+        if (!response.ok) {
+            throw new Error('Failed to add inventory item');
+        }
+        return response.json();
+    },
+
+    deleteInventoryItem: async (inventoryId) => {
+        const response = await fetch(`${API_BASE_URL}/products/inventory/${inventoryId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to delete inventory item');
+        }
+        return response.json();
+    }
 }; 

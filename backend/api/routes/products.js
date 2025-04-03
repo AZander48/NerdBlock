@@ -117,6 +117,66 @@ const productQueries = {
             console.error('Database error in getInventoryOverview:', error);
             throw error;
         }
+    },
+
+    getAllProducts: async () => {
+        try {
+            const result = await executeQuery(`
+                SELECT 
+                    CAST(p.[ProductID] as INT) as ProductID,
+                    p.[Name],
+                    p.[Description],
+                    p.[Price],
+                    g.[Name] as GenreName
+                FROM [Products] p
+                LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                ORDER BY g.[Name], p.[Name]
+            `);
+            return result.recordset;
+        } catch (error) {
+            console.error('Database error in getAllProducts:', error);
+            throw error;
+        }
+    },
+
+    addInventoryItem: async (productId, quantity, productName = null) => {
+        try {
+            // First get the original product name if no custom name is provided
+            if (!productName) {
+                const productResult = await executeQuery(
+                    `SELECT Name FROM Products WHERE ProductID = @productId`,
+                    [{ name: 'productId', type: sql.Int, value: productId }]
+                );
+                productName = productResult.recordset[0].Name;
+            }
+
+            const result = await executeQuery(
+                `INSERT INTO [Inventory] (ProductID, Quantity, ProductName)
+                 VALUES (@productId, @quantity, @productName)`,
+                [
+                    { name: 'productId', type: sql.Int, value: productId },
+                    { name: 'quantity', type: sql.Int, value: quantity },
+                    { name: 'productName', type: sql.VarChar(100), value: productName }
+                ]
+            );
+            return result;
+        } catch (error) {
+            console.error('Database error in addInventoryItem:', error);
+            throw error;
+        }
+    },
+
+    deleteInventoryItem: async (inventoryId) => {
+        try {
+            const result = await executeQuery(
+                `DELETE FROM [Inventory] WHERE InventoryID = @inventoryId`,
+                [{ name: 'inventoryId', type: sql.Int, value: inventoryId }]
+            );
+            return result;
+        } catch (error) {
+            console.error('Database error in deleteInventoryItem:', error);
+            throw error;
+        }
     }
 };
 
@@ -211,4 +271,47 @@ router.get('/inventory', async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch inventory' });
     }
 });
+
+router.get('/all', async (req, res) => {
+    try {
+        const products = await productQueries.getAllProducts();
+        res.json(products);
+    } catch (error) {
+        console.error('Error fetching all products:', error);
+        res.status(500).json({ message: 'Failed to fetch products' });
+    }
+});
+
+router.post('/inventory', async (req, res) => {
+    try {
+        const { productId, quantity, productName } = req.body;
+        
+        if (!productId || !quantity) {
+            return res.status(400).json({ message: 'Product ID and quantity are required' });
+        }
+
+        await productQueries.addInventoryItem(productId, quantity, productName);
+        res.json({ message: 'Inventory item added successfully' });
+    } catch (error) {
+        console.error('Error adding inventory item:', error);
+        res.status(500).json({ message: 'Failed to add inventory item' });
+    }
+});
+
+router.delete('/inventory/:id', async (req, res) => {
+    try {
+        const inventoryId = parseInt(req.params.id);
+        
+        if (!inventoryId) {
+            return res.status(400).json({ message: 'Invalid inventory ID' });
+        }
+
+        await productQueries.deleteInventoryItem(inventoryId);
+        res.json({ message: 'Inventory item deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting inventory item:', error);
+        res.status(500).json({ message: 'Failed to delete inventory item' });
+    }
+});
+
 export default router;
