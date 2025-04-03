@@ -354,5 +354,31 @@ export const queryApi = {
             throw new Error('Failed to delete inventory item');
         }
         return response.json();
+    },
+
+    addProduct: async (productData) => {
+        const response = await fetch(`${API_BASE_URL}/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(productData)
+        });
+        if (!response.ok) {
+            throw new Error('Failed to add product');
+        }
+        return response.json();
+    },
+
+    deleteProduct: async (productId) => {
+        const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to delete product');
+        }
+        return response.json();
     }
 }; 

@@ -177,6 +177,45 @@ const productQueries = {
             console.error('Database error in deleteInventoryItem:', error);
             throw error;
         }
+    },
+
+    addProduct: async (name, description, price, genreId) => {
+        try {
+            const result = await executeQuery(
+                `INSERT INTO [Products] (Name, Description, Price, GenreID)
+                 VALUES (@name, @description, @price, @genreId)`,
+                [
+                    { name: 'name', type: sql.VarChar(30), value: name },
+                    { name: 'description', type: sql.VarChar(150), value: description },
+                    { name: 'price', type: sql.Decimal(9,2), value: price },
+                    { name: 'genreId', type: sql.Int, value: genreId }
+                ]
+            );
+            return result;
+        } catch (error) {
+            console.error('Database error in addProduct:', error);
+            throw error;
+        }
+    },
+
+    deleteProduct: async (productId) => {
+        try {
+            // First delete related inventory items
+            await executeQuery(
+                `DELETE FROM [Inventory] WHERE ProductID = @productId`,
+                [{ name: 'productId', type: sql.Int, value: productId }]
+            );
+            
+            // Then delete the product
+            const result = await executeQuery(
+                `DELETE FROM [Products] WHERE ProductID = @productId`,
+                [{ name: 'productId', type: sql.Int, value: productId }]
+            );
+            return result;
+        } catch (error) {
+            console.error('Database error in deleteProduct:', error);
+            throw error;
+        }
     }
 };
 
@@ -311,6 +350,38 @@ router.delete('/inventory/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting inventory item:', error);
         res.status(500).json({ message: 'Failed to delete inventory item' });
+    }
+});
+
+router.post('/', async (req, res) => {
+    try {
+        const { name, description, price, genreId } = req.body;
+        
+        if (!name || !description || !price || !genreId) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        await productQueries.addProduct(name, description, price, genreId);
+        res.json({ message: 'Product added successfully' });
+    } catch (error) {
+        console.error('Error adding product:', error);
+        res.status(500).json({ message: 'Failed to add product' });
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const productId = parseInt(req.params.id);
+        
+        if (!productId) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+
+        await productQueries.deleteProduct(productId);
+        res.json({ message: 'Product deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        res.status(500).json({ message: 'Failed to delete product' });
     }
 });
 

@@ -55,6 +55,7 @@
                 <!-- Employee View Links -->
                 <a href="/inventory" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Inventory</a>
                 <a href="/reports" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Reports</a>
+                <a href="/products" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Products</a>
             </div>
         </div>
     </nav>
@@ -107,7 +108,7 @@
                 isEmployeeLoggedIn = true;
                 employeeLoginLink.classList.add('hidden');
                 employeeStatus.classList.remove('hidden');
-                employeeName.textContent = `${employee.FirstName} ${employee.LastName}`;
+                employeeName.textContent = `${employee.firstName} ${employee.lastName}`;
                 
                 // Show employee links
                 employeeLinks.forEach(link => link.classList.remove('hidden'));
