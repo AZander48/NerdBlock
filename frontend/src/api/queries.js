@@ -315,5 +315,8 @@ export const queryApi = {
         }
     },
 
-    // Add other API methods here
+    // Add these new methods
+    getReportSummary: () => fetchQueryData('/reports/summary'),
+    getShippingReports: () => fetchQueryData('/reports/shipping'),
+    getTransferReports: () => fetchQueryData('/reports/transfers')
 }; 

@@ -5,6 +5,12 @@ npm dev: builds and runs 11ty server
 npm run css: builds the css and puts it into the _site folder
 
 # to run locally
+   ## Backend
+    - open terminal
+    - navigate to backend folder: cd .\backend\
+    - install node modules: npm i
+    - run server: node server.js
+   ## Frontend
     - open terminal
     - be in frontend folder: cd .\frontend\
     - install node modules: npm i
@@ -51,21 +57,23 @@ npm install
      3. `sample_queries_for_demo.sql`
 
 4. Configure database connection:
-   - Open `backend/api/queries.js`
-   - Update the database configuration with your SQL Server details:
+   - Open `backend/config/database.js`
+   - This is where the database configuration is. You will have to fill out your SQL Server details here:
+      - you can either create a .env file with matching variables at /backend or replace the string beside them.
    ```javascript
-   const config = {
-       user: 'your_username',
-       password: 'your_password',
-       server: 'your_server_name',
-       database: 'NerdBlock',
-       options: {
-           trustServerCertificate: true,
-           enableArithAbort: true,
-           encrypt: false
-       }
-   };
+      export const dbConfig = {
+         user: process.env.DB_USER || 'nerdblock_user',
+         password: process.env.DB_PASSWORD || 'NerdBlock123!',
+         server: process.env.DB_SERVER || 'your_server_name',
+         database: process.env.DB_NAME || 'NerdBlock',
+         options: {
+            trustServerCertificate: true,
+            enableArithAbort: true,
+            encrypt: false
+         }
+      }; 
    ```
+
 
 5. SQL Server Management Settings:
    - Open SQL Server Management Studio (SSMS)
@@ -148,18 +156,53 @@ The SQL page provides an interface for running and testing database queries. To 
 nerdblock/
 ├── frontend/
 │   ├── src/
-│   │   ├── styles/
+│   │   ├── api/
+│   │   │   └── queries.js
 │   │   ├── _includes/
-│   │   └── *.njk
+│   │   │   ├── header.njk
+│   │   │   └── layouts/
+│   │   ├── images/
+│   │   ├── styles/
+│   │   ├── subscriber/
+│   │   ├── subscription/
+│   │   ├── index.njk
+│   │   ├── catalog.njk
+│   │   ├── inventory.njk
+│   │   ├── reports.njk
+│   │   ├── register.njk
+│   │   ├── subscriberLogin.njk
+│   │   ├── employee-login.njk
+│   │   ├── employee-reset.njk
+│   │   ├── employee-set-password.njk
+│   │   ├── forgot-password.njk
+│   │   ├── reset-password.njk
+│   │   └── sql.njk
 │   ├── sql/
 │   │   ├── create_tables.sql
 │   │   ├── insert_dummy_data.sql
 │   │   └── sample_queries_for_demo.sql
-│   └── package.json
+│   ├── _site/
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   └── .eleventy.js
 ├── backend/
 │   ├── api/
+│   │   ├── routes/
+│   │   │   ├── auth.js
+│   │   │   ├── products.js
+│   │   │   ├── employeeAuth.js
+│   │   │   └── reports.js
+│   │   ├── utils/
+│   │   │   └── db.js
+│   │   ├── middleware/
+│   │   ├── config/
 │   │   └── queries.js
-│   └── package.json
+│   ├── server.js
+│   ├── .env
+│   ├── package.json
+│   └── package-lock.json
 └── README.md
 ```
 
