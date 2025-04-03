@@ -98,8 +98,80 @@ title: Inventory Management - Nerdblock
   </div>
 </div>
 
+<!-- Add this modal HTML before the closing </div> of the main container -->
+<div id="transferModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-lg max-w-md w-full">
+        <h3 class="text-2xl font-bold mb-6">Transfer to Overstock</h3>
+        <form id="transferForm" class="space-y-6">
+            <input type="hidden" id="transferInventoryId">
+            
+            <div>
+                <label class="block text-sm font-medium mb-2" for="transferStore">Store Location</label>
+                <select id="transferStore" required
+                    class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-purple-500">
+                    <option value="">Select a store</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2" for="transferQuantity">Quantity to Transfer</label>
+                <input type="number" id="transferQuantity" required min="1"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2" for="transferKey">Transfer Sorting Key (Optional)</label>
+                <input type="text" id="transferKey"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-purple-500"
+                    placeholder="e.g., TRANSFER-2024-001">
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeTransferModal()"
+                    class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none">
+                    Transfer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script type="module">
 import { queryApi } from '/api/queries.js';
+
+// Create global references to our functions
+window.openTransferModal = function(inventoryId, quantity) {
+    document.getElementById('transferInventoryId').value = inventoryId;
+    window.currentInventoryQuantity = quantity;
+    document.getElementById('transferQuantity').max = quantity;
+    document.getElementById('transferModal').classList.remove('hidden');
+};
+
+window.closeTransferModal = function() {
+    document.getElementById('transferModal').classList.add('hidden');
+    document.getElementById('transferForm').reset();
+};
+
+window.deleteInventoryItem = async function(inventoryId) {
+    if (!confirm('Are you sure you want to delete this inventory item?')) {
+        return;
+    }
+
+    try {
+        await queryApi.deleteInventoryItem(inventoryId);
+        // Refresh the inventory display
+        await loadInventory();
+    } catch (error) {
+        console.error('Error deleting inventory item:', error);
+        alert('Failed to delete inventory item. Please try again.');
+    }
+};
+
+let stores = [];
 
 async function loadInventory() {
     try {
@@ -155,15 +227,26 @@ async function loadInventory() {
                     </span>
                 </td>
                 <td class="px-6 py-4">
-                    <button 
-                        onclick="deleteInventoryItem(${item.InventoryID})"
-                        class="text-red-400 hover:text-red-300 focus:outline-none"
-                        title="Delete item">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
+                    <div class="flex space-x-2">
+                        <button 
+                            onclick="openTransferModal(${item.InventoryID}, ${item.InventoryQuantity})"
+                            class="text-blue-400 hover:text-blue-300 focus:outline-none"
+                            title="Transfer to overstock">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                        </button>
+                        <button 
+                            onclick="deleteInventoryItem(${item.InventoryID})"
+                            class="text-red-400 hover:text-red-300 focus:outline-none"
+                            title="Delete item">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -187,6 +270,23 @@ async function loadProducts() {
     } catch (error) {
         console.error('Error loading products:', error);
         alert('Failed to load products. Please try again later.');
+    }
+}
+
+async function loadStores() {
+    try {
+        stores = await queryApi.getAllStores();
+        const storeSelect = document.getElementById('transferStore');
+        
+        storeSelect.innerHTML = `
+            <option value="">Select a store</option>
+            ${stores.map(store => `
+                <option value="${store.StoreID}">${store.City} - ${store.StreetAddress}</option>
+            `).join('')}
+        `;
+    } catch (error) {
+        console.error('Error loading stores:', error);
+        alert('Failed to load stores. Please try again later.');
     }
 }
 
@@ -216,29 +316,40 @@ document.getElementById('addInventoryForm').addEventListener('submit', async (e)
     }
 });
 
-// Load both inventory and products when the page loads
+document.getElementById('transferForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+        const quantity = parseInt(document.getElementById('transferQuantity').value);
+        if (quantity > window.currentInventoryQuantity) {
+            alert('Transfer quantity cannot exceed available quantity');
+            return;
+        }
+
+        const transferData = {
+            inventoryId: parseInt(document.getElementById('transferInventoryId').value),
+            storeId: parseInt(document.getElementById('transferStore').value),
+            quantity: quantity,
+            transferSortingKey: document.getElementById('transferKey').value
+        };
+
+        await queryApi.transferInventoryToOverstock(transferData);
+        alert('Transfer successful!');
+        
+        // Close modal and refresh inventory
+        window.closeTransferModal();
+        await loadInventory();
+    } catch (error) {
+        console.error('Error transferring inventory:', error);
+        alert(error.message || 'Failed to transfer inventory. Please try again.');
+    }
+});
+
+// Load data when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     loadInventory();
     loadProducts();
+    loadStores();
 });
-
-// Add the delete function to your script section
-async function deleteInventoryItem(inventoryId) {
-    if (!confirm('Are you sure you want to delete this inventory item?')) {
-        return;
-    }
-
-    try {
-        await queryApi.deleteInventoryItem(inventoryId);
-        // Refresh the inventory display
-        await loadInventory();
-    } catch (error) {
-        console.error('Error deleting inventory item:', error);
-        alert('Failed to delete inventory item. Please try again.');
-    }
-}
-
-// Make the delete function available to the onclick handler
-window.deleteInventoryItem = deleteInventoryItem;
 </script>
 {% endblock %} 

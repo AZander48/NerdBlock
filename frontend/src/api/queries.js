@@ -380,5 +380,31 @@ export const queryApi = {
             throw new Error('Failed to delete product');
         }
         return response.json();
+    },
+
+    getAllStores: async () => {
+        const response = await fetch(`${API_BASE_URL}/products/stores`, {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch stores');
+        }
+        return response.json();
+    },
+
+    transferInventoryToOverstock: async (transferData) => {
+        const response = await fetch(`${API_BASE_URL}/products/inventory/transfer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(transferData)
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to transfer inventory');
+        }
+        return response.json();
     }
 }; 

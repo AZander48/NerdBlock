@@ -1,6 +1,6 @@
 import express from 'express';
 import sql from 'mssql';
-import { executeQuery } from '../utils/db.js';
+import { executeQuery, getConnection } from '../utils/db.js';
 
 const router = express.Router();
 
@@ -216,6 +216,97 @@ const productQueries = {
             console.error('Database error in deleteProduct:', error);
             throw error;
         }
+    },
+
+    transferInventoryToOverstock: async (inventoryId, storeId, quantity, transferSortingKey) => {
+        const pool = await getConnection();
+        const transaction = new sql.Transaction(pool);
+
+        try {
+            await transaction.begin();
+
+            // Create a request object bound to the transaction
+            const request = new sql.Request(transaction);
+
+            // Get inventory item details
+            const inventoryResult = await request
+                .input('inventoryId', sql.Int, inventoryId)
+                .query(`
+                    SELECT i.ProductID, i.Quantity, i.ProductName 
+                    FROM [Inventory] i 
+                    WHERE i.InventoryID = @inventoryId
+                `);
+
+            if (!inventoryResult.recordset[0]) {
+                throw new Error('Inventory item not found');
+            }
+
+            const inventoryItem = inventoryResult.recordset[0];
+
+            if (inventoryItem.Quantity < quantity) {
+                throw new Error('Insufficient quantity available for transfer');
+            }
+
+            // Clear previous parameters and add new ones for overstock insert
+            request.parameters = {};
+
+            // Generate a default transfer key if none is provided
+            const finalTransferKey = transferSortingKey?.trim() || `AUTO-${new Date().toISOString().slice(0, 10)}`;
+
+            await request
+                .input('productId', sql.Int, inventoryItem.ProductID)
+                .input('storeId', sql.Int, storeId)
+                .input('transferQuantity', sql.Int, quantity)
+                .input('transferSortingKey', sql.VarChar(50), finalTransferKey)
+                .query(`
+                    INSERT INTO [Overstock] (ProductID, StoreID, Quantity, TransferSortingKey)
+                    VALUES (@productId, @storeId, @transferQuantity, @transferSortingKey)
+                `);
+
+            // Clear previous parameters and add new ones for inventory update
+            request.parameters = {};
+            await request
+                .input('updateQuantity', sql.Int, quantity)
+                .input('updateInventoryId', sql.Int, inventoryId)
+                .query(`
+                    UPDATE [Inventory]
+                    SET Quantity = Quantity - @updateQuantity
+                    WHERE InventoryID = @updateInventoryId
+                `);
+
+            // Clear previous parameters and add new ones for inventory delete
+            request.parameters = {};
+            await request
+                .input('deleteInventoryId', sql.Int, inventoryId)
+                .query(`
+                    DELETE FROM [Inventory]
+                    WHERE InventoryID = @deleteInventoryId AND Quantity <= 0
+                `);
+
+            await transaction.commit();
+            return { success: true };
+        } catch (error) {
+            await transaction.rollback();
+            console.error('Database error in transferInventoryToOverstock:', error);
+            throw error;
+        }
+    },
+
+    getAllStores: async () => {
+        try {
+            const result = await executeQuery(`
+                SELECT 
+                    CAST(s.[StoreID] as INT) as StoreID,
+                    s.[City],
+                    s.[StreetAddress]
+                FROM [Stores] s
+                ORDER BY s.[City], s.[StreetAddress]
+            `);
+            return result.recordset;
+        } catch (error) {
+            console.error('Database error in getAllStores:', error);
+            throw error;
+        }
     }
 };
 
@@ -382,6 +473,43 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting product:', error);
         res.status(500).json({ message: 'Failed to delete product' });
+    }
+});
+
+// Add new routes
+router.get('/stores', async (req, res) => {
+    try {
+        const stores = await productQueries.getAllStores();
+        res.json(stores);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Failed to fetch stores',
+            error: error.message
+        });
+    }
+});
+
+router.post('/inventory/transfer', async (req, res) => {
+    try {
+        const { inventoryId, storeId, quantity, transferSortingKey } = req.body;
+        
+        if (!inventoryId || !storeId || !quantity) {
+            return res.status(400).json({ message: 'Missing required fields: inventoryId, storeId, or quantity' });
+        }
+
+        await productQueries.transferInventoryToOverstock(
+            parseInt(inventoryId),
+            parseInt(storeId),
+            parseInt(quantity),
+            transferSortingKey // This can now be undefined or null
+        );
+
+        res.json({ message: 'Transfer successful' });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Failed to transfer inventory',
+            error: error.message
+        });
     }
 });
 
