@@ -17,140 +17,145 @@ title: Business Reports - Nerdblock
     <!-- Key Metrics -->
     <section class="mb-16">
       <h2 class="text-3xl font-bold mb-8 text-center">Key Business Metrics</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-purple-500 mb-2">20K+</div>
-          <h3 class="text-xl font-semibold mb-2">Active Subscribers</h3>
-          <p class="text-gray-300">Growing customer base</p>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-green-500 mb-2">95%</div>
-          <h3 class="text-xl font-semibold mb-2">Customer Satisfaction</h3>
-          <p class="text-gray-300">High retention rate</p>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-blue-500 mb-2">3+</div>
-          <h3 class="text-xl font-semibold mb-2">Subscription Types</h3>
-          <p class="text-gray-300">Diverse product offerings</p>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-          <div class="text-4xl font-bold text-yellow-500 mb-2">Global</div>
-          <h3 class="text-xl font-semibold mb-2">Market Reach</h3>
-          <p class="text-gray-300">International presence</p>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8" id="reportMetrics">
+        <!-- Will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-32 bg-gray-700 rounded-2xl"></div>
         </div>
       </div>
     </section>
 
-    <!-- Report Types -->
+    <!-- Transfer Reports -->
     <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center">Report Types</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
-          <h3 class="text-2xl font-bold mb-6">Financial Reports</h3>
-          <ul class="space-y-4">
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Revenue Analysis</h4>
-                <p class="text-gray-300">Track subscription revenue and growth trends</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Cost Analysis</h4>
-                <p class="text-gray-300">Monitor operational costs and profitability</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Financial Forecasting</h4>
-                <p class="text-gray-300">Predict future financial performance</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
-          <h3 class="text-2xl font-bold mb-6">Customer Analytics</h3>
-          <ul class="space-y-4">
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Customer Demographics</h4>
-                <p class="text-gray-300">Analyze customer profiles and preferences</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Subscription Trends</h4>
-                <p class="text-gray-300">Track subscription patterns and churn rates</p>
-              </div>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-6 w-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <div>
-                <h4 class="font-semibold">Customer Feedback</h4>
-                <p class="text-gray-300">Monitor customer satisfaction and reviews</p>
-              </div>
-            </li>
-          </ul>
+      <h2 class="text-3xl font-bold mb-8 text-center">Transfer Reports</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Product Name</th>
+                <th class="px-6 py-4">Quantity</th>
+                <th class="px-6 py-4">Destination Store</th>
+                <th class="px-6 py-4">Transfer Key</th>
+              </tr>
+            </thead>
+            <tbody id="transferReportsList">
+              <!-- Will be populated by JavaScript -->
+              <tr>
+                <td colspan="5" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
 
-    <!-- Report Generation -->
-    <section class="bg-gray-700 rounded-2xl shadow-lg p-8">
-      <h2 class="text-3xl font-bold mb-8 text-center">Report Generation</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Custom Reports</h3>
-          <p class="text-gray-300">Generate tailored reports based on your needs</p>
-        </div>
-
-        <div class="text-center">
-          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Export Options</h3>
-          <p class="text-gray-300">Export reports in various formats</p>
-        </div>
-
-        <div class="text-center">
-          <div class="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Scheduled Reports</h3>
-          <p class="text-gray-300">Automated report generation and delivery</p>
+    <!-- Shipping Reports -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Shipping Reports</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Customer Name</th>
+                <th class="px-6 py-4">Transaction Amount</th>
+                <th class="px-6 py-4">Shipping Duration (days)</th>
+              </tr>
+            </thead>
+            <tbody id="shippingReportsList">
+              <!-- Will be populated by JavaScript -->
+              <tr>
+                <td colspan="4" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
   </div>
 </div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+async function loadReports() {
+    try {
+        // Fetch all report data
+        const [summary, transfers, shipping] = await Promise.all([
+            queryApi.getReportSummary(),
+            queryApi.getTransferReports(),
+            queryApi.getShippingReports()
+        ]);
+
+        // Update metrics
+        const metricsDiv = document.getElementById('reportMetrics');
+        metricsDiv.innerHTML = `
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-purple-500 mb-2">${summary.TotalShipments || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Total Shipments</h3>
+                <p class="text-gray-300">Completed deliveries</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-green-500 mb-2">${summary.AvgShippingDuration?.toFixed(1) || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Avg. Shipping Days</h3>
+                <p class="text-gray-300">Delivery duration</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-blue-500 mb-2">${summary.TotalTransfers || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Total Transfers</h3>
+                <p class="text-gray-300">Inventory movements</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-yellow-500 mb-2">${summary.UniqueCustomers || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Unique Customers</h3>
+                <p class="text-gray-300">Active buyers</p>
+            </div>
+        `;
+
+        // Update transfer reports
+        const transfersList = document.getElementById('transferReportsList');
+        transfersList.innerHTML = transfers.map(transfer => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">${new Date(transfer.Date).toLocaleDateString()}</td>
+                <td class="px-6 py-4">${transfer.ProductName}</td>
+                <td class="px-6 py-4">${transfer.TransferQuantity}</td>
+                <td class="px-6 py-4">${transfer.DestinationStore}</td>
+                <td class="px-6 py-4">${transfer.TransferSortingKey}</td>
+            </tr>
+        `).join('') || '<tr><td colspan="5" class="px-6 py-4 text-center">No transfer reports available</td></tr>';
+
+        // Update shipping reports
+        const shippingList = document.getElementById('shippingReportsList');
+        shippingList.innerHTML = shipping.map(ship => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">${new Date(ship.Date).toLocaleDateString()}</td>
+                <td class="px-6 py-4">${ship.SubscriberName}</td>
+                <td class="px-6 py-4">$${ship.TransactionAmount?.toFixed(2) || '0.00'}</td>
+                <td class="px-6 py-4">${ship.ShippingDuration} days</td>
+            </tr>
+        `).join('') || '<tr><td colspan="4" class="px-6 py-4 text-center">No shipping reports available</td></tr>';
+
+    } catch (error) {
+        console.error('Error loading reports:', error);
+        alert('Failed to load reports. Please try again later.');
+    }
+}
+
+// Load reports when the page loads
+document.addEventListener('DOMContentLoaded', loadReports);
+</script>
 {% endblock %} 
