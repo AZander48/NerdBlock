@@ -223,6 +223,13 @@ const productQueries = {
         const transaction = new sql.Transaction(pool);
 
         try {
+            console.log('Starting transfer process with params:', {
+                inventoryId,
+                storeId,
+                quantity,
+                transferSortingKey
+            });
+
             await transaction.begin();
 
             // Create a request object bound to the transaction
@@ -247,23 +254,33 @@ const productQueries = {
                 throw new Error('Insufficient quantity available for transfer');
             }
 
+            // Generate a numeric transfer key if none is provided
+            const finalTransferKey = transferSortingKey ? 
+                parseInt(transferSortingKey.replace(/\D/g, '')) : // Remove non-digits and parse
+                parseInt(new Date().getTime().toString().slice(-9)); // Use timestamp last 9 digits
+
             // Clear previous parameters and add new ones for overstock insert
             request.parameters = {};
-
-            // Generate a default transfer key if none is provided
-            const finalTransferKey = transferSortingKey?.trim() || `AUTO-${new Date().toISOString().slice(0, 10)}`;
-
             await request
                 .input('productId', sql.Int, inventoryItem.ProductID)
                 .input('storeId', sql.Int, storeId)
                 .input('transferQuantity', sql.Int, quantity)
-                .input('transferSortingKey', sql.VarChar(50), finalTransferKey)
+                .input('transferSortingKey', sql.Numeric(9), finalTransferKey)
                 .query(`
                     INSERT INTO [Overstock] (ProductID, StoreID, Quantity, TransferSortingKey)
                     VALUES (@productId, @storeId, @transferQuantity, @transferSortingKey)
                 `);
 
-            // Clear previous parameters and add new ones for inventory update
+            // Create transfer report entry
+            await request
+                .input('transferDate', sql.DateTime, new Date())
+                .input('transferKey', sql.Numeric(9), finalTransferKey)
+                .query(`
+                    INSERT INTO [TransferReport] (Date, TransferSortingKey)
+                    VALUES (@transferDate, @transferKey)
+                `);
+
+            // Update Inventory quantity
             request.parameters = {};
             await request
                 .input('updateQuantity', sql.Int, quantity)
@@ -274,7 +291,7 @@ const productQueries = {
                     WHERE InventoryID = @updateInventoryId
                 `);
 
-            // Clear previous parameters and add new ones for inventory delete
+            // Delete if quantity becomes 0
             request.parameters = {};
             await request
                 .input('deleteInventoryId', sql.Int, inventoryId)
@@ -284,11 +301,17 @@ const productQueries = {
                 `);
 
             await transaction.commit();
-            return { success: true };
+            return { success: true, transferKey: finalTransferKey };
         } catch (error) {
-            await transaction.rollback();
+            if (transaction) {
+                try {
+                    await transaction.rollback();
+                } catch (rollbackError) {
+                    console.error('Error rolling back transaction:', rollbackError);
+                }
+            }
             console.error('Database error in transferInventoryToOverstock:', error);
-            throw error;
+            throw new Error('Failed to transfer inventory: ' + error.message);
         }
     },
 

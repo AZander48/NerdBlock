@@ -326,11 +326,15 @@ document.getElementById('transferForm').addEventListener('submit', async (e) => 
             return;
         }
 
+        const transferKey = document.getElementById('transferKey').value.trim();
+        // Only send the numeric part of the transfer key, or undefined if empty
+        const numericTransferKey = transferKey ? transferKey.replace(/\D/g, '') : undefined;
+
         const transferData = {
             inventoryId: parseInt(document.getElementById('transferInventoryId').value),
             storeId: parseInt(document.getElementById('transferStore').value),
             quantity: quantity,
-            transferSortingKey: document.getElementById('transferKey').value
+            transferSortingKey: numericTransferKey
         };
 
         await queryApi.transferInventoryToOverstock(transferData);

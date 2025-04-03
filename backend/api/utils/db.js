@@ -12,7 +12,6 @@ pool.on('error', err => {
 
 export async function getConnection() {
     try {
-        // Wait for pool connection to be established
         await poolConnect;
         return pool;
     } catch (err) {
@@ -26,7 +25,6 @@ export async function executeQuery(query, params = []) {
         const pool = await getConnection();
         const request = pool.request();
         
-        // Add parameters if they exist
         params.forEach(param => {
             request.input(param.name, param.type, param.value);
         });
@@ -37,4 +35,4 @@ export async function executeQuery(query, params = []) {
         console.error('Error executing query:', err);
         throw err;
     }
-} 
+}
