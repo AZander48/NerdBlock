@@ -1,0 +1,267 @@
+---
+title: Subscription Management - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Subscription Management</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Manage your subscription and nerd boxes
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Current Subscription Status -->
+    <section id="currentSubscription" class="bg-gray-700 rounded-2xl shadow-lg p-8 mb-16">
+      <h2 class="text-3xl font-bold mb-6">Current Subscription</h2>
+      <div id="subscriptionDetails" class="animate-pulse">
+        <div class="h-4 bg-gray-600 rounded w-3/4 mb-4"></div>
+        <div class="h-4 bg-gray-600 rounded w-1/2"></div>
+      </div>
+    </section>
+
+    <!-- Available Plans Section -->
+    <section id="availablePlans" class="mb-16">
+      <h2 class="text-3xl font-bold mb-6">Available Plans</h2>
+      <p class="text-lg text-gray-300 mb-8">
+        Want to expand your collection? Subscribe to additional genre blocks below!
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Plans will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Subscription Management Features -->
+    <section class="bg-gray-700 rounded-2xl shadow-lg p-8 mb-16">
+      <h2 class="text-3xl font-bold mb-6 text-center">Subscription Features</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Account Management</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Update subscription details
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Change shipping address
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              View subscription history
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Subscription Options</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Pause subscription
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Cancel subscription
+            </li>
+            <li class="flex items-center">
+              <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Add additional blocks
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+async function loadCurrentSubscription() {
+  try {
+    const currentUser = await queryApi.getCurrentSubscriber();
+    console.log('Current user data:', currentUser);
+    
+    const subscriptionDetails = document.getElementById('subscriptionDetails');
+    
+    if (!currentUser) {
+        window.location.href = '/subscriberLogin?redirect=/subscription';
+        return;
+    }
+
+    if (!currentUser.SubscriptionID) {
+        subscriptionDetails.innerHTML = `
+            <div class="text-gray-300">
+                <p class="mb-4">You don't have an active subscription.</p>
+                <p>Choose from our available plans below to get started!</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Format date to be more readable
+    const startDate = currentUser.SubscriptionStartDate ? 
+      new Date(currentUser.SubscriptionStartDate).toLocaleDateString() : 
+      'Not available';
+
+    // Use nullish coalescing for potentially undefined values
+    const genreName = currentUser.GenreName ?? 'Not selected';
+    const subscriptionType = currentUser.SubscriptionType ?? 'Monthly';
+
+    console.log('Subscription details:', {
+      genreName,
+      subscriptionType,
+      startDate
+    });
+
+    subscriptionDetails.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Subscription Details</h3>
+          <ul class="space-y-3">
+            <li><span class="text-gray-300">Plan:</span> ${genreName}</li>
+            <li><span class="text-gray-300">Type:</span> ${subscriptionType}</li>
+            <li><span class="text-gray-300">Start Date:</span> ${startDate}</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Actions</h3>
+          <div class="space-y-4">
+            <button id="cancelSubscription" 
+                    class="w-full bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition-colors">
+              Cancel Subscription
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Add event listener for cancel subscription
+    document.getElementById('cancelSubscription')?.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
+        try {
+          await queryApi.cancelSubscription(currentUser.SubscriptionID);
+          alert('Your subscription has been cancelled successfully.');
+          location.reload();
+        } catch (error) {
+          console.error('Error cancelling subscription:', error);
+          alert('Failed to cancel subscription. Please try again later.');
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error loading current subscription:', error);
+    const subscriptionDetails = document.getElementById('subscriptionDetails');
+    subscriptionDetails.innerHTML = `
+      <div class="bg-red-600 text-white p-4 rounded-lg">
+        <p>Error loading subscription details. Please try again later.</p>
+      </div>
+    `;
+  }
+}
+
+async function loadAvailablePlans() {
+  try {
+    const plans = await queryApi.getSubscriptionPlans();
+    const plansContainer = document.querySelector('#availablePlans .grid');
+    
+    console.log('Available plans:', plans);
+    plansContainer.innerHTML = '';
+    
+    plans.forEach(plan => {
+      const planHtml = `
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-8 text-center transform hover:scale-105 transition-transform">
+          <h3 class="text-2xl font-bold mb-4">${plan.name}</h3>
+          <div class="space-y-4 mb-4">
+            <div class="text-3xl font-bold">
+              Monthly: $${plan.monthlyPrice?.toFixed(2) || '15.99'}
+            </div>
+            <div class="text-xl text-gray-300">
+              Annual: $${plan.annualPrice?.toFixed(2) || '149.99'}
+            </div>
+          </div>
+          <ul class="text-left mb-6 space-y-2">
+            ${plan.features.map(feature => `
+              <li class="flex items-center">
+                <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                ${feature}
+              </li>
+            `).join('')}
+          </ul>
+          <button 
+            data-plan="${plan.name.toLowerCase()}"
+            data-genre-id="${plan.id}"
+            data-plan-name="${plan.name}"
+            class="subscribe-button bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full transition-colors">
+            Subscribe Now
+          </button>
+        </div>
+      `;
+      
+      plansContainer.insertAdjacentHTML('beforeend', planHtml);
+    });
+
+    // Add click handlers to the subscribe buttons
+    document.querySelectorAll('.subscribe-button').forEach(button => {
+      button.addEventListener('click', async () => {
+        try {
+          const plan = button.getAttribute('data-plan');
+          const genreId = button.getAttribute('data-genre-id');
+          const planName = button.getAttribute('data-plan-name');
+          
+          console.log('Selected plan:', { plan, genreId, planName });
+
+          sessionStorage.setItem('selectedPlan', plan);
+          sessionStorage.setItem('selectedGenreId', genreId);
+          sessionStorage.setItem('selectedPlanName', planName);
+
+          window.location.href = `/subscription/confirm?plan=${plan}`;
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Something went wrong. Please try again.');
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error loading subscription plans:', error);
+    const container = document.querySelector('#availablePlans .grid');
+    container.innerHTML = `
+      <div class="bg-red-600 text-white p-4 rounded-lg col-span-3">
+        <p>Sorry, we couldn't load the subscription plans. Please try again later.</p>
+      </div>
+    `;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check if we need to force a reload of the data
+    const forceReload = sessionStorage.getItem('forceReload');
+    if (forceReload) {
+        sessionStorage.removeItem('forceReload');
+        // Clear any cached data
+        sessionStorage.removeItem('currentSubscription');
+    }
+
+    await loadCurrentSubscription();
+    await loadAvailablePlans();
+});
+</script>
+{% endblock %} 

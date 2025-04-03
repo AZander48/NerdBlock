@@ -1,0 +1,207 @@
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800 px-4">
+  <div class="bg-gray-700 p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <h2 class="text-3xl font-bold text-center mb-6">Create Your Nerdblock Account</h2>
+    
+    <form action="/register" method="POST" class="space-y-6">
+      <div>
+        <label for="userName" class="block text-sm font-medium mb-1">User Name</label>
+        <input type="text" id="userName" name="userName" required
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+      <div>
+        <label for="firstName" class="block text-sm font-medium mb-1">First Name</label>
+        <input type="text" id="firstName" name="firstName" required
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="lastName" class="block text-sm font-medium mb-1">Last Name</label>
+        <input type="text" id="lastName" name="lastName" required
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium mb-1">Email Address</label>
+        <input type="email" id="email" name="email" required
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <input type="password" id="password" name="password" required
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="confirm" class="block text-sm font-medium mb-1">Confirm Password</label>
+        <input type="password" id="confirm" name="confirm" required
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="phoneNumber" class="block text-sm font-medium mb-1">Phone Number</label>
+        <input type="text" id="phoneNumber" name="phoneNumber"
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="shippingAddress" class="block text-sm font-medium mb-1">Shipping Address</label>
+        <input type="text" id="shippingAddress" name="shippingAddress"
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="billingAddress" class="block text-sm font-medium mb-1">Billing Address</label>
+        <input type="text" id="billingAddress" name="billingAddress"
+               class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+      </div>
+
+      <div>
+        <label for="country" class="block text-sm font-medium mb-1">Country</label>
+        <select id="country" name="country" required
+                class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <option value="">Select a country</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="paymentType" class="block text-sm font-medium mb-1">Payment Type</label>
+        <select id="paymentType" name="paymentType" required
+                class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <option value="">Select payment type</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="PayPal">PayPal</option>
+        </select>
+      </div>
+
+      <button type="submit" id="submitButton"
+              class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+        Register
+      </button>
+
+      <p class="text-sm text-center text-gray-400 mt-4">
+        Already have an account?
+        <a href="/login" class="text-purple-400 hover:underline">Log in</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+// Function to load countries
+async function loadCountries() {
+    try {
+        const countries = await queryApi.getCountries();
+        const countrySelect = document.getElementById('country');
+        
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.CountryID;
+            option.textContent = country.CountryName;
+            countrySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Failed to load countries:', error);
+        alert('Failed to load countries. Please refresh the page.');
+    }
+}
+
+// Function to handle form submission
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    const button = document.getElementById('submitButton');
+    button.disabled = true;
+    button.textContent = 'Registering...';
+    
+    const formData = new FormData(event.target);
+    
+    // Add country validation
+    const countryId = formData.get('country');
+    if (!countryId) {
+        alert('Please select a country');
+        button.disabled = false;
+        button.textContent = 'Register';
+        return;
+    }
+
+    // Validate required fields
+    const requiredFields = ['userName', 'firstName', 'lastName', 'email', 'password', 'confirm'];
+    for (const field of requiredFields) {
+        if (!formData.get(field)) {
+            alert(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+            button.disabled = false;
+            button.textContent = 'Register';
+            return;
+        }
+    }
+
+    // Validate password length
+    const password = formData.get('password');
+    if (password.length < 8) {
+        alert('Password must be at least 8 characters long');
+        button.disabled = false;
+        button.textContent = 'Register';
+        return;
+    }
+    
+    // Validate passwords match
+    const confirm = formData.get('confirm');
+    if (password !== confirm) {
+        alert('Passwords do not match!');
+        button.disabled = false;
+        button.textContent = 'Register';
+        return;
+    }
+
+    // Validate email format
+    const email = formData.get('email');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        button.disabled = false;
+        button.textContent = 'Register';
+        return;
+    }
+    
+    const subscriberData = {
+        userName: formData.get('userName'),
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        password: password,
+        phoneNumber: formData.get('phoneNumber'),
+        shippingAddress: formData.get('shippingAddress'),
+        billingAddress: formData.get('billingAddress'),
+        countryId: parseInt(countryId),
+        paymentType: formData.get('paymentType')
+    };
+
+    try {
+        const response = await queryApi.registerSubscriber(subscriberData);
+        console.log('Registration successful:', response);
+        
+        // Redirect to login page with success message
+        window.location.href = '/subscriberLogin?message=Registration successful! Please log in.';
+    } catch (error) {
+        console.error('Registration failed:', error);
+        alert(error.message || 'Registration failed. Please try again.');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Register';
+    }
+} 
+
+// Update DOMContentLoaded handler to load countries
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', handleFormSubmit);
+    loadCountries();  // Load countries when page loads
+});
+</script>
+{% endblock %}

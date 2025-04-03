@@ -1,0 +1,405 @@
+---
+title: SQL Queries - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">SQL Queries</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Sample queries and data for the NerdBlock subscription service
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Query Categories -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Query Categories</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6">
+          <h3 class="text-2xl font-bold mb-4">Simple Queries</h3>
+          <ul class="space-y-2 text-gray-300">
+            <li>• Retrieve all countries</li>
+            <li>• List subscription genres</li>
+            <li>• Display supplier details</li>
+            <li>• Show current employees</li>
+            <li>• List all products</li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6">
+          <h3 class="text-2xl font-bold mb-4">Intermediate Queries</h3>
+          <ul class="space-y-2 text-gray-300">
+            <li>• Find subscribers by country</li>
+            <li>• Show inventory quantities</li>
+            <li>• Recent transactions</li>
+            <li>• New employees</li>
+            <li>• Overstock quantities</li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6">
+          <h3 class="text-2xl font-bold mb-4">Advanced Queries</h3>
+          <ul class="space-y-2 text-gray-300">
+            <li>• Popular subscriptions</li>
+            <li>• Monthly revenue</li>
+            <li>• Shipping analytics</li>
+            <li>• Overstock analysis</li>
+            <li>• Multiple subscriptions</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sample Data -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Sample Data</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6">
+          <h3 class="text-2xl font-bold mb-4">Countries</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-600">
+                  <th class="px-4 py-2 text-center">Country</th>
+                  <th class="px-4 py-2 text-center">Tax (%)</th>
+                  <th class="px-4 py-2 text-center">Fees</th>
+                </tr>
+              </thead>
+              <tbody id="countriesTable" class="text-center">
+                <!-- Data will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="bg-gray-700 rounded-2xl shadow-lg p-6">
+          <h3 class="text-2xl font-bold mb-4">Products</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-600">
+                  <th class="px-4 py-2 text-center">Product</th>
+                  <th class="px-4 py-2 text-center">Price</th>
+                  <th class="px-4 py-2 text-center">Stock</th>
+                </tr>
+              </thead>
+              <tbody id="productsTable" class="text-center">
+                <!-- Data will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Query Examples -->
+    <section class="bg-gray-700 rounded-2xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold mb-8 text-center">Query Examples</h2>
+      <div class="space-y-6">
+        <div class="bg-gray-800 rounded-lg p-4">
+          <h3 class="text-xl font-semibold mb-2">Simple Query Example</h3>
+          <pre class="bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <code class="text-sm text-gray-300">
+SELECT DISTINCT CountryName 
+FROM Country;
+            </code>
+          </pre>
+          <p class="text-gray-300 mt-2 mb-4 italic">
+            This query retrieves a list of all unique countries where NerdBlock ships to, along with their tax rates and additional fees.
+          </p>
+          <div class="mt-4">
+            <button onclick="executeQuery('countries')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Run Query
+            </button>
+          </div>
+          <div id="countries-results" class="mt-4 hidden">
+            <h4 class="text-lg font-semibold mb-2">Results:</h4>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-600">
+                    <th class="px-4 py-2 text-center">Country Name</th>
+                    <th class="px-4 py-2 text-center">Tax (%)</th>
+                    <th class="px-4 py-2 text-center">Additional Fees</th>
+                  </tr>
+                </thead>
+                <tbody id="countries-results-body" class="text-center">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-4">
+          <h3 class="text-xl font-semibold mb-2">Intermediate Query Example</h3>
+          <pre class="bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <code class="text-sm text-gray-300">
+SELECT s.FirstName, s.LastName, c.CountryName, g.Name AS Genre
+FROM Subscriber s
+JOIN Country c ON s.CountryID = c.CountryID
+JOIN Genres g ON s.GenreID = g.GenreID
+WHERE c.CountryName = 'Canada' AND g.Name = 'Fantasy';
+            </code>
+          </pre>
+          <p class="text-gray-300 mt-2 mb-4 italic">
+            This query analyzes subscription trends by showing the number of subscribers for each genre, helping identify the most popular subscription types.
+          </p>
+          <div class="mt-4">
+            <button onclick="executeQuery('subscription-analytics')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Run Query
+            </button>
+          </div>
+          <div id="subscription-analytics-results" class="mt-4 hidden">
+            <h4 class="text-lg font-semibold mb-2">Results:</h4>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-600">
+                    <th class="px-4 py-2 text-center">Genre</th>
+                    <th class="px-4 py-2 text-center">Subscriber Count</th>
+                  </tr>
+                </thead>
+                <tbody id="subscription-analytics-results-body" class="text-center">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-4">
+          <h3 class="text-xl font-semibold mb-2">Advanced Query Example</h3>
+          <pre class="bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <code class="text-sm text-gray-300">
+SELECT g.Name AS Genre, SUM(t.TotalPrice) AS TotalRevenue
+FROM Transactions t
+JOIN Subscriber s ON t.SubscriberID = s.SubscriberID
+JOIN Genres g ON s.GenreID = g.GenreID
+WHERE t.Date >= DATEADD(year, -1, GETDATE())
+GROUP BY g.Name;
+            </code>
+          </pre>
+          <p class="text-gray-300 mt-2 mb-4 italic">
+            This query calculates the total revenue generated by each genre over the past year, providing insights into the financial performance of different subscription categories.
+          </p>
+          <div class="mt-4">
+            <button onclick="executeQuery('revenue-analytics')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Run Query
+            </button>
+          </div>
+          <div id="revenue-analytics-results" class="mt-4 hidden">
+            <h4 class="text-lg font-semibold mb-2">Results:</h4>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-600">
+                    <th class="px-4 py-2 text-center">Genre</th>
+                    <th class="px-4 py-2 text-center">Total Subscribers</th>
+                    <th class="px-4 py-2 text-center">Total Revenue</th>
+                    <th class="px-4 py-2 text-center">Avg Transaction</th>
+                    <th class="px-4 py-2 text-center">Transaction Count</th>
+                  </tr>
+                </thead>
+                <tbody id="revenue-analytics-results-body" class="text-center">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-4 mt-6">
+          <h3 class="text-xl font-semibold mb-2">Complex Analytical Query Example</h3>
+          <pre class="bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <code class="text-sm text-gray-300">
+SELECT 
+    g.Name AS Genre,
+    COUNT(DISTINCT s.SubscriberID) AS TotalSubscribers,
+    SUM(t.TotalPrice) AS TotalRevenue,
+    AVG(t.TotalPrice) AS AverageTransactionValue,
+    COUNT(t.TransactionID) AS TransactionCount
+FROM Genres g
+LEFT JOIN Subscriber s ON g.GenreID = s.GenreID
+LEFT JOIN Transactions t ON s.SubscriberID = t.SubscriberID
+WHERE t.Date >= DATEADD(year, -1, GETDATE())
+GROUP BY g.Name
+ORDER BY SUM(t.TotalPrice) DESC;
+            </code>
+          </pre>
+          <p class="text-gray-300 mt-2 mb-4 italic">
+            This comprehensive analysis provides a detailed breakdown of each genre's performance, including total subscribers, revenue metrics, and transaction patterns, ordered by highest revenue.
+          </p>
+          <div class="mt-4">
+            <button onclick="executeQuery('revenue-analytics')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Run Query
+            </button>
+          </div>
+          <div id="complex-analytics-results" class="mt-4 hidden">
+            <h4 class="text-lg font-semibold mb-2">Results:</h4>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-600">
+                    <th class="px-4 py-2 text-center">Genre</th>
+                    <th class="px-4 py-2 text-center">Total Subscribers</th>
+                    <th class="px-4 py-2 text-center">Total Revenue</th>
+                    <th class="px-4 py-2 text-center">Avg Transaction</th>
+                    <th class="px-4 py-2 text-center">Transaction Count</th>
+                  </tr>
+                </thead>
+                <tbody id="complex-analytics-results-body" class="text-center">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+import { queryApi } from './api/queries.js';
+
+// Function to format date
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString();
+}
+
+// Function to format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
+
+// Function to populate results table
+function populateResultsTable(queryType, data) {
+    const resultsDiv = document.getElementById(`${queryType}-results`);
+    const resultsBody = document.getElementById(`${queryType}-results-body`);
+    
+    // Also populate complex analytics if it's revenue data
+    if (queryType === 'revenue-analytics') {
+        const complexDiv = document.getElementById('complex-analytics-results');
+        const complexBody = document.getElementById('complex-analytics-results-body');
+        complexDiv.classList.remove('hidden');
+        complexBody.innerHTML = '';
+    }
+    
+    resultsDiv.classList.remove('hidden');
+    resultsBody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="5" class="px-4 py-2 text-center">No results found</td>`;
+        resultsBody.appendChild(tr);
+        if (queryType === 'revenue-analytics') {
+            const complexTr = tr.cloneNode(true);
+            document.getElementById('complex-analytics-results-body').appendChild(complexTr);
+        }
+        return;
+    }
+
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-600';
+        
+        switch(queryType) {
+            case 'countries':
+                tr.innerHTML = `
+                    <td class="px-4 py-2 text-center">${row.CountryName}</td>
+                    <td class="px-4 py-2 text-center">${row.Tax}</td>
+                    <td class="px-4 py-2 text-center">${formatCurrency(row.AdditionalFees)}</td>
+                `;
+                break;
+            case 'subscription-analytics':
+                tr.innerHTML = `
+                    <td class="px-4 py-2 text-center">${row.Genre}</td>
+                    <td class="px-4 py-2 text-center">${row.SubscriberCount}</td>
+                `;
+                break;
+            case 'revenue-analytics':
+                const revenueHtml = `
+                    <td class="px-4 py-2 text-center">${row.Genre}</td>
+                    <td class="px-4 py-2 text-center">${row.TotalSubscribers}</td>
+                    <td class="px-4 py-2 text-center">${formatCurrency(row.TotalRevenue)}</td>
+                    <td class="px-4 py-2 text-center">${formatCurrency(row.AverageTransactionValue)}</td>
+                    <td class="px-4 py-2 text-center">${row.TransactionCount}</td>
+                `;
+                tr.innerHTML = revenueHtml;
+                
+                // Also populate complex analytics
+                const complexTr = document.createElement('tr');
+                complexTr.className = 'border-b border-gray-600';
+                complexTr.innerHTML = revenueHtml;
+                document.getElementById('complex-analytics-results-body').appendChild(complexTr);
+                break;
+        }
+        
+        resultsBody.appendChild(tr);
+    });
+}
+
+// Function to populate sample data tables
+function populateSampleTable(tableId, data) {
+    const tableBody = document.getElementById(tableId);
+    tableBody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="3" class="px-4 py-2 text-center">No data available</td>`;
+        tableBody.appendChild(tr);
+        return;
+    }
+
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-600';
+        
+        if (tableId === 'countriesTable') {
+            tr.innerHTML = `
+                <td class="px-4 py-2 text-center">${row.CountryName}</td>
+                <td class="px-4 py-2 text-center">${row.Tax}</td>
+                <td class="px-4 py-2 text-center">${formatCurrency(row.AdditionalFees)}</td>
+            `;
+        } else if (tableId === 'productsTable') {
+            tr.innerHTML = `
+                <td class="px-4 py-2 text-center">${row.Name}</td>
+                <td class="px-4 py-2 text-center">${formatCurrency(row.Price)}</td>
+                <td class="px-4 py-2 text-center">${row.Quantity}</td>
+            `;
+        }
+        
+        tableBody.appendChild(tr);
+    });
+}
+
+// Function to execute queries
+async function executeQuery(queryType) {
+    try {
+        const data = await queryApi[`get${queryType.charAt(0).toUpperCase() + queryType.slice(1)}`]();
+        if (data) {
+            if (queryType === 'countries') {
+                populateSampleTable('countriesTable', data);
+                populateResultsTable('countries', data);
+            } else if (queryType === 'products') {
+                populateSampleTable('productsTable', data);
+            } else {
+                populateResultsTable(queryType, data);
+            }
+        }
+    } catch (error) {
+        // Show error message to user
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'bg-red-500 text-white p-4 rounded-lg mt-4';
+        errorDiv.textContent = `Error loading data: ${error.message}`;
+        document.querySelector('.max-w-6xl').appendChild(errorDiv);
+    }
+}
+
+// Load initial data
+document.addEventListener('DOMContentLoaded', () => {
+    executeQuery('countries');
+    executeQuery('products');
+});
+</script>
+{% endblock %} 

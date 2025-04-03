@@ -1,0 +1,445 @@
+---
+title: Inventory Management - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Inventory Management</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Track and manage your subscription box inventory
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Inventory Overview -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Inventory Overview</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="inventoryStats">
+        <!-- Stats will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-32 bg-gray-700 rounded-2xl"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inventory List -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Current Inventory</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Product Name</th>
+                <th class="px-6 py-4">Genre</th>
+                <th class="px-6 py-4">Description</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Quantity</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryList">
+              <!-- Inventory items will be populated by JavaScript -->
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add this section after the "Current Inventory" section and before the "Add New Inventory" section -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Overstock Items</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Product Name</th>
+                <th class="px-6 py-4">Genre</th>
+                <th class="px-6 py-4">Store Location</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Quantity</th>
+                <th class="px-6 py-4">Transfer Key</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="overstockList">
+              <!-- Overstock items will be populated by JavaScript -->
+              <tr>
+                <td colspan="7" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add this section after the "Overstock Items" section -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Add New Inventory</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
+        <form id="addInventoryForm" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium mb-2" for="productId">Product</label>
+              <select id="productId" name="productId" required
+                class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:border-purple-500">
+                <option value="">Select a product</option>
+                <!-- Will be populated by JavaScript -->
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2" for="quantity">Quantity</label>
+              <input type="number" id="quantity" name="quantity" required min="1"
+                class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2" for="productName">Custom Product Name (Optional)</label>
+              <input type="text" id="productName" name="productName"
+                class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:border-purple-500"
+                placeholder="Leave blank to use original product name">
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit"
+              class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+              Add to Inventory
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Add this modal HTML before the closing </div> of the main container -->
+<div id="transferModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-lg max-w-md w-full">
+        <h3 class="text-2xl font-bold mb-6">Transfer to Overstock</h3>
+        <form id="transferForm" class="space-y-6">
+            <input type="hidden" id="transferInventoryId">
+            
+            <div>
+                <label class="block text-sm font-medium mb-2" for="transferStore">Store Location</label>
+                <select id="transferStore" required
+                    class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-purple-500">
+                    <option value="">Select a store</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2" for="transferQuantity">Quantity to Transfer</label>
+                <input type="number" id="transferQuantity" required min="1"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2" for="transferKey">Transfer Sorting Key (Optional)</label>
+                <input type="text" id="transferKey"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-purple-500"
+                    placeholder="e.g., TRANSFER-2024-001">
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeTransferModal()"
+                    class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none">
+                    Transfer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+// Create global references to our functions
+window.openTransferModal = function(inventoryId, quantity) {
+    document.getElementById('transferInventoryId').value = inventoryId;
+    window.currentInventoryQuantity = quantity;
+    document.getElementById('transferQuantity').max = quantity;
+    document.getElementById('transferModal').classList.remove('hidden');
+};
+
+window.closeTransferModal = function() {
+    document.getElementById('transferModal').classList.add('hidden');
+    document.getElementById('transferForm').reset();
+};
+
+window.deleteInventoryItem = async function(inventoryId) {
+    if (!confirm('Are you sure you want to delete this inventory item?')) {
+        return;
+    }
+
+    try {
+        await queryApi.deleteInventoryItem(inventoryId);
+        // Refresh the inventory display
+        await loadInventory();
+    } catch (error) {
+        console.error('Error deleting inventory item:', error);
+        alert('Failed to delete inventory item. Please try again.');
+    }
+};
+
+let stores = [];
+
+async function loadInventory() {
+    try {
+        const data = await queryApi.getInventoryOverview();
+        
+        // Update stats
+        const statsDiv = document.getElementById('inventoryStats');
+        statsDiv.innerHTML = `
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-purple-500 mb-2">${data.stats.UniqueInventoryProducts}</div>
+                <h3 class="text-xl font-semibold mb-2">Unique Products</h3>
+                <p class="text-gray-300">Different items in stock</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-green-500 mb-2">${data.stats.TotalInventory}</div>
+                <h3 class="text-xl font-semibold mb-2">Total Items</h3>
+                <p class="text-gray-300">Total inventory count</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-yellow-500 mb-2">${data.stats.TotalOverstock || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Overstock Items</h3>
+                <p class="text-gray-300">Items in overstock</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-blue-500 mb-2">${data.stats.GenreCount}</div>
+                <h3 class="text-xl font-semibold mb-2">Categories</h3>
+                <p class="text-gray-300">Product categories</p>
+            </div>
+        `;
+
+        // Update inventory list
+        const inventoryList = document.getElementById('inventoryList');
+        inventoryList.innerHTML = data.inventory.map(item => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">
+                    ${item.ProductName}
+                    ${item.ProductName !== item.OriginalProductName ? 
+                        `<div class="text-xs text-gray-400">(${item.OriginalProductName})</div>` : 
+                        ''}
+                </td>
+                <td class="px-6 py-4">${item.GenreName || 'Uncategorized'}</td>
+                <td class="px-6 py-4">${item.Description || 'No description'}</td>
+                <td class="px-6 py-4">$${item.Price ? item.Price.toFixed(2) : '0.00'}</td>
+                <td class="px-6 py-4">${item.InventoryQuantity}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 rounded-full text-xs ${
+                        item.InventoryQuantity > 10 ? 'bg-green-500' :
+                        item.InventoryQuantity > 0 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                    }">
+                        ${
+                            item.InventoryQuantity > 10 ? 'In Stock' :
+                            item.InventoryQuantity > 0 ? 'Low Stock' :
+                            'Out of Stock'
+                        }
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex space-x-2">
+                        <button 
+                            onclick="openTransferModal(${item.InventoryID}, ${item.InventoryQuantity})"
+                            class="text-blue-400 hover:text-blue-300 focus:outline-none"
+                            title="Transfer to overstock">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                        </button>
+                        <button 
+                            onclick="deleteInventoryItem(${item.InventoryID})"
+                            class="text-red-400 hover:text-red-300 focus:outline-none"
+                            title="Delete item">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        // Update overstock list
+        const overstockList = document.getElementById('overstockList');
+        overstockList.innerHTML = data.overstock.map(item => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">
+                    ${item.ProductName}
+                </td>
+                <td class="px-6 py-4">${item.GenreName || 'Uncategorized'}</td>
+                <td class="px-6 py-4">${item.StoreCity} - ${item.StoreStreetAddress}</td>
+                <td class="px-6 py-4">$${item.Price ? item.Price.toFixed(2) : '0.00'}</td>
+                <td class="px-6 py-4">${item.OverstockQuantity}</td>
+                <td class="px-6 py-4">${item.TransferSortingKey}</td>
+                <td class="px-6 py-4">
+                    <button 
+                        onclick="deleteOverstockItem(${item.OverstockID})"
+                        class="text-red-400 hover:text-red-300 focus:outline-none"
+                        title="Delete item">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('') || `
+            <tr>
+                <td colspan="7" class="px-6 py-4 text-center text-gray-400">
+                    No overstock items found
+                </td>
+            </tr>
+        `;
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        alert('Failed to load inventory data. Please try again later.');
+    }
+}
+
+async function loadProducts() {
+    try {
+        const products = await queryApi.getAllProducts();
+        const productSelect = document.getElementById('productId');
+        
+        productSelect.innerHTML = `
+            <option value="">Select a product</option>
+            ${products.map(product => `
+                <option value="${product.ProductID}">${product.Name} (${product.GenreName})</option>
+            `).join('')}
+        `;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        alert('Failed to load products. Please try again later.');
+    }
+}
+
+async function loadStores() {
+    try {
+        stores = await queryApi.getAllStores();
+        const storeSelect = document.getElementById('transferStore');
+        
+        storeSelect.innerHTML = `
+            <option value="">Select a store</option>
+            ${stores.map(store => `
+                <option value="${store.StoreID}">${store.City} - ${store.StreetAddress}</option>
+            `).join('')}
+        `;
+    } catch (error) {
+        console.error('Error loading stores:', error);
+        alert('Failed to load stores. Please try again later.');
+    }
+}
+
+// Handle form submission
+document.getElementById('addInventoryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+        const productName = document.getElementById('productName').value.trim();
+        const formData = {
+            productId: parseInt(document.getElementById('productId').value),
+            quantity: parseInt(document.getElementById('quantity').value),
+            productName: productName || undefined  // Send undefined instead of empty string
+        };
+
+        await queryApi.addInventoryItem(formData);
+        alert('Inventory item added successfully!');
+        
+        // Refresh the inventory display
+        await loadInventory();
+        
+        // Reset form
+        e.target.reset();
+    } catch (error) {
+        console.error('Error adding inventory item:', error);
+        alert('Failed to add inventory item. Please try again.');
+    }
+});
+
+document.getElementById('transferForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+        const quantity = parseInt(document.getElementById('transferQuantity').value);
+        if (quantity > window.currentInventoryQuantity) {
+            alert('Transfer quantity cannot exceed available quantity');
+            return;
+        }
+
+        const transferKey = document.getElementById('transferKey').value.trim();
+        // Only send the numeric part of the transfer key, or undefined if empty
+        const numericTransferKey = transferKey ? transferKey.replace(/\D/g, '') : undefined;
+
+        const transferData = {
+            inventoryId: parseInt(document.getElementById('transferInventoryId').value),
+            storeId: parseInt(document.getElementById('transferStore').value),
+            quantity: quantity,
+            transferSortingKey: numericTransferKey
+        };
+
+        await queryApi.transferInventoryToOverstock(transferData);
+        alert('Transfer successful!');
+        
+        // Close modal and refresh inventory
+        window.closeTransferModal();
+        await loadInventory();
+    } catch (error) {
+        console.error('Error transferring inventory:', error);
+        alert(error.message || 'Failed to transfer inventory. Please try again.');
+    }
+});
+
+// Add delete overstock function
+window.deleteOverstockItem = async function(overstockId) {
+    if (!confirm('Are you sure you want to delete this overstock item?')) {
+        return;
+    }
+
+    try {
+        await queryApi.deleteOverstockItem(overstockId);
+        // Refresh the inventory display
+        await loadInventory();
+    } catch (error) {
+        console.error('Error deleting overstock item:', error);
+        alert('Failed to delete overstock item. Please try again.');
+    }
+};
+
+// Load data when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadInventory();
+    loadProducts();
+    loadStores();
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,161 @@
+---
+title: Business Reports - Nerdblock
+---
+
+{% extends "layouts/default.njk" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white px-6 py-12">
+  <header class="text-center mb-16">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Business Reports</h1>
+    <p class="text-lg md:text-2xl max-w-2xl mx-auto mb-6">
+      Make data-driven decisions with comprehensive business analytics
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Key Metrics -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Key Business Metrics</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8" id="reportMetrics">
+        <!-- Will be populated by JavaScript -->
+        <div class="animate-pulse">
+          <div class="h-32 bg-gray-700 rounded-2xl"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transfer Reports -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Transfer Reports</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Product Name</th>
+                <th class="px-6 py-4">Quantity</th>
+                <th class="px-6 py-4">Destination Store</th>
+                <th class="px-6 py-4">Transfer Key</th>
+              </tr>
+            </thead>
+            <tbody id="transferReportsList">
+              <!-- Will be populated by JavaScript -->
+              <tr>
+                <td colspan="5" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shipping Reports -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Shipping Reports</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Customer Name</th>
+                <th class="px-6 py-4">Transaction Amount</th>
+                <th class="px-6 py-4">Shipping Duration (days)</th>
+              </tr>
+            </thead>
+            <tbody id="shippingReportsList">
+              <!-- Will be populated by JavaScript -->
+              <tr>
+                <td colspan="4" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import { queryApi } from '/api/queries.js';
+
+async function loadReports() {
+    try {
+        // Fetch all report data
+        const [summary, transfers, shipping] = await Promise.all([
+            queryApi.getReportSummary(),
+            queryApi.getTransferReports(),
+            queryApi.getShippingReports()
+        ]);
+
+        // Update metrics
+        const metricsDiv = document.getElementById('reportMetrics');
+        metricsDiv.innerHTML = `
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-purple-500 mb-2">${summary.TotalShipments || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Total Shipments</h3>
+                <p class="text-gray-300">Completed deliveries</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-green-500 mb-2">${summary.AvgShippingDuration?.toFixed(1) || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Avg. Shipping Days</h3>
+                <p class="text-gray-300">Delivery duration</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-blue-500 mb-2">${summary.TotalTransfers || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Total Transfers</h3>
+                <p class="text-gray-300">Inventory movements</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-yellow-500 mb-2">${summary.UniqueCustomers || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Unique Customers</h3>
+                <p class="text-gray-300">Active buyers</p>
+            </div>
+        `;
+
+        // Update transfer reports
+        const transfersList = document.getElementById('transferReportsList');
+        transfersList.innerHTML = transfers.map(transfer => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">${new Date(transfer.Date).toLocaleDateString()}</td>
+                <td class="px-6 py-4">${transfer.ProductName}</td>
+                <td class="px-6 py-4">${transfer.TransferQuantity}</td>
+                <td class="px-6 py-4">${transfer.DestinationStore}</td>
+                <td class="px-6 py-4">${transfer.TransferSortingKey}</td>
+            </tr>
+        `).join('') || '<tr><td colspan="5" class="px-6 py-4 text-center">No transfer reports available</td></tr>';
+
+        // Update shipping reports
+        const shippingList = document.getElementById('shippingReportsList');
+        shippingList.innerHTML = shipping.map(ship => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">${new Date(ship.Date).toLocaleDateString()}</td>
+                <td class="px-6 py-4">${ship.SubscriberName}</td>
+                <td class="px-6 py-4">$${ship.TransactionAmount?.toFixed(2) || '0.00'}</td>
+                <td class="px-6 py-4">${ship.ShippingDuration} days</td>
+            </tr>
+        `).join('') || '<tr><td colspan="4" class="px-6 py-4 text-center">No shipping reports available</td></tr>';
+
+    } catch (error) {
+        console.error('Error loading reports:', error);
+        alert('Failed to load reports. Please try again later.');
+    }
+}
+
+// Load reports when the page loads
+document.addEventListener('DOMContentLoaded', loadReports);
+</script>
+{% endblock %} 
