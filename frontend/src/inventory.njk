@@ -69,13 +69,13 @@ async function loadInventory() {
         const statsDiv = document.getElementById('inventoryStats');
         statsDiv.innerHTML = `
             <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-                <div class="text-4xl font-bold text-purple-500 mb-2">${data.stats.UniqueProducts}</div>
+                <div class="text-4xl font-bold text-purple-500 mb-2">${data.stats.UniqueInventoryProducts}</div>
                 <h3 class="text-xl font-semibold mb-2">Unique Products</h3>
                 <p class="text-gray-300">Different items in stock</p>
             </div>
 
             <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
-                <div class="text-4xl font-bold text-green-500 mb-2">${data.stats.TotalItems}</div>
+                <div class="text-4xl font-bold text-green-500 mb-2">${data.stats.TotalInventory}</div>
                 <h3 class="text-xl font-semibold mb-2">Total Items</h3>
                 <p class="text-gray-300">Total inventory count</p>
             </div>
@@ -100,16 +100,16 @@ async function loadInventory() {
                 <td class="px-6 py-4">${item.GenreName || 'Uncategorized'}</td>
                 <td class="px-6 py-4">${item.Description || 'No description'}</td>
                 <td class="px-6 py-4">$${item.Price ? item.Price.toFixed(2) : '0.00'}</td>
-                <td class="px-6 py-4">${item.Quantity}</td>
+                <td class="px-6 py-4">${item.InventoryQuantity}</td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 rounded-full text-xs ${
-                        item.Quantity > 10 ? 'bg-green-500' :
-                        item.Quantity > 0 ? 'bg-yellow-500' :
+                        item.InventoryQuantity > 10 ? 'bg-green-500' :
+                        item.InventoryQuantity > 0 ? 'bg-yellow-500' :
                         'bg-red-500'
                     }">
                         ${
-                            item.Quantity > 10 ? 'In Stock' :
-                            item.Quantity > 0 ? 'Low Stock' :
+                            item.InventoryQuantity > 10 ? 'In Stock' :
+                            item.InventoryQuantity > 0 ? 'Low Stock' :
                             'Out of Stock'
                         }
                     </span>

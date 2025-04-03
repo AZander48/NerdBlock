@@ -2,12 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import queriesRouter from './api/queries.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: 'http://localhost:8081',
+    origin: process.env.LOCAL_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

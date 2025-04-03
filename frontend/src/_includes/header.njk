@@ -49,13 +49,12 @@
             <div class="flex flex-col md:flex-row md:items-center md:space-x-8">
                 <!-- Customer View Links -->
                 <a href="/" class="text-white hover:text-gray-300 py-2 md:py-0">Home</a>
-                <a href="/subscription" class="text-white hover:text-gray-300 py-2 md:py-0">Subscription</a>
+                <a href="/subscription" class="text-white hover:text-gray-300 py-2 md:py-0 subscriber-only">Subscription</a>
                 <a href="/catalog" class="text-white hover:text-gray-300 py-2 md:py-0">Catalog</a>
 
                 <!-- Employee View Links -->
                 <a href="/inventory" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Inventory</a>
                 <a href="/reports" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link">Reports</a>
-                <a href="/sql" class="text-white hover:text-gray-300 py-2 md:py-0 hidden employee-link admin-only">SQL</a>
             </div>
         </div>
     </nav>
@@ -67,6 +66,7 @@
 
     document.addEventListener('DOMContentLoaded', async function() {
         const employeeLinks = document.querySelectorAll('.employee-link');
+        const subscriberOnlyLinks = document.querySelectorAll('.subscriber-only');
         const adminOnlyLinks = document.querySelectorAll('.admin-only');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -78,15 +78,18 @@
         const profileLink = document.getElementById('profileLink');
         const authLinks = document.getElementById('authLinks');
 
+        let isSubscriberLoggedIn = false;
+        let isEmployeeLoggedIn = false;
+
         // Check subscriber authentication status
         try {
             const subscriber = await queryApi.getCurrentSubscriber();
             if (subscriber) {
+                isSubscriberLoggedIn = true;
                 loginLink.classList.add('hidden');
                 profileLink.classList.remove('hidden');
-            } else {
-                loginLink.classList.remove('hidden');
-                profileLink.classList.add('hidden');
+                // Hide employee login when subscriber is logged in
+                employeeLoginLink.classList.add('hidden');
             }
         } catch (error) {
             console.error('Error checking subscriber auth status:', error);
@@ -101,6 +104,7 @@
         try {
             const employee = await queryApi.getCurrentEmployee();
             if (employee) {
+                isEmployeeLoggedIn = true;
                 employeeLoginLink.classList.add('hidden');
                 employeeStatus.classList.remove('hidden');
                 employeeName.textContent = `${employee.FirstName} ${employee.LastName}`;
@@ -112,18 +116,29 @@
                 if (employee.IsAdmin) {
                     adminOnlyLinks.forEach(link => link.classList.remove('hidden'));
                 }
-            } else {
+
+                // Hide subscriber-specific elements
+                loginLink.classList.add('hidden');
+                subscriberOnlyLinks.forEach(link => link.classList.add('hidden'));
+            } else if (!isSubscriberLoggedIn) {
+                // Only show employee login if subscriber is not logged in
                 employeeLoginLink.classList.remove('hidden');
                 employeeStatus.classList.add('hidden');
                 employeeLinks.forEach(link => link.classList.add('hidden'));
                 adminOnlyLinks.forEach(link => link.classList.add('hidden'));
+                // Show subscriber links when not logged in as employee
+                subscriberOnlyLinks.forEach(link => link.classList.remove('hidden'));
             }
         } catch (error) {
             console.error('Error checking employee auth status:', error);
-            employeeLoginLink.classList.remove('hidden');
+            if (!isSubscriberLoggedIn) {
+                employeeLoginLink.classList.remove('hidden');
+            }
             employeeStatus.classList.add('hidden');
             employeeLinks.forEach(link => link.classList.add('hidden'));
             adminOnlyLinks.forEach(link => link.classList.add('hidden'));
+            // Show subscriber links on error
+            subscriberOnlyLinks.forEach(link => link.classList.remove('hidden'));
         }
 
         // Handle employee logout

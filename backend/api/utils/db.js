@@ -1,29 +1,40 @@
 import sql from 'mssql';
 import { dbConfig } from '../config/database.js';
 
-export async function executeQuery(query) {
+// Create a single connection pool
+const pool = new sql.ConnectionPool(dbConfig);
+const poolConnect = pool.connect();
+
+// Handle pool connection errors
+pool.on('error', err => {
+    console.error('SQL Pool Error:', err);
+});
+
+export async function getConnection() {
     try {
-        console.log('Attempting to connect to database...');
-        await sql.connect(dbConfig);
-        console.log('Successfully connected to database');
-        
-        const result = await sql.query(query);
-        console.log('Query executed successfully');
-        
-        return result.recordset;
+        // Wait for pool connection to be established
+        await poolConnect;
+        return pool;
     } catch (err) {
-        console.error('SQL error details:', {
-            message: err.message,
-            code: err.code,
-            state: err.state
-        });
+        console.error('Error getting connection:', err);
         throw err;
-    } finally {
-        try {
-            await sql.close();
-            console.log('Database connection closed');
-        } catch (err) {
-            console.error('Error closing connection:', err);
-        }
+    }
+}
+
+export async function executeQuery(query, params = []) {
+    try {
+        const pool = await getConnection();
+        const request = pool.request();
+        
+        // Add parameters if they exist
+        params.forEach(param => {
+            request.input(param.name, param.type, param.value);
+        });
+        
+        const result = await request.query(query);
+        return result;
+    } catch (err) {
+        console.error('Error executing query:', err);
+        throw err;
     }
 } 

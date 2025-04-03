@@ -1,28 +1,26 @@
 import express from 'express';
 import sql from 'mssql';
-import { dbConfig } from '../config/database.js';
+import { executeQuery } from '../utils/db.js';
 
 const router = express.Router();
 
-// Move product queries here
 const productQueries = {
-    getAllGenres: async (pool) => {
+    getAllGenres: async () => {
         try {
             console.log('Executing getAllGenres query...');
-            const result = await pool.request()
-                .query(`
-                    SELECT 
-                        CAST(g.[GenreID] as INT) as GenreID,
-                        g.[Name] as GenreName,
-                        ISNULL(g.[Description], 'Explore our collection') as GenreDescription,
-                        COUNT(DISTINCT p.[ProductID]) as ProductCount,
-                        SUM(i.[Quantity]) as TotalInventory
-                    FROM [Genres] g
-                    LEFT JOIN [Products] p ON g.[GenreID] = p.[GenreID]
-                    LEFT JOIN [Inventory] i ON p.[ProductID] = i.[ProductID]
-                    GROUP BY g.[GenreID], g.[Name], g.[Description]
-                    ORDER BY g.[Name]
-                `);
+            const result = await executeQuery(`
+                SELECT 
+                    CAST(g.[GenreID] as INT) as GenreID,
+                    g.[Name] as GenreName,
+                    ISNULL(g.[Description], 'Explore our collection') as GenreDescription,
+                    COUNT(DISTINCT p.[ProductID]) as ProductCount,
+                    SUM(i.[Quantity]) as TotalInventory
+                FROM [Genres] g
+                LEFT JOIN [Products] p ON g.[GenreID] = p.[GenreID]
+                LEFT JOIN [Inventory] i ON p.[ProductID] = i.[ProductID]
+                GROUP BY g.[GenreID], g.[Name], g.[Description]
+                ORDER BY g.[Name]
+            `);
             
             console.log('Query result:', result.recordset);
             return result.recordset;
@@ -32,27 +30,26 @@ const productQueries = {
         }
     },
 
-    getProductsByGenre: async (pool, genreId) => {
+    getProductsByGenre: async (genreId) => {
         try {
             console.log('Executing getProductsByGenre query with genreId:', genreId);
-            const result = await pool.request()
-                .input('genreId', sql.Numeric(9), genreId)
-                .query(`
-                    SELECT 
-                        CAST(p.[ProductID] as INT) as ProductID,
-                        p.[Name] as ProductName,
-                        p.[Description],
-                        p.[Price],
-                        CAST(p.[GenreID] as INT) as GenreID,
-                        g.[Name] as GenreName,
-                        i.[Quantity] as StockQuantity,
-                        i.[ProductName] as InventoryName
-                    FROM [Products] p
-                    JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
-                    LEFT JOIN [Inventory] i ON p.[ProductID] = i.[ProductID]
-                    WHERE p.[GenreID] = @genreId
-                    ORDER BY p.[Name]
-                `);
+            const result = await executeQuery(
+                `SELECT 
+                    CAST(p.[ProductID] as INT) as ProductID,
+                    p.[Name] as ProductName,
+                    p.[Description],
+                    p.[Price],
+                    CAST(p.[GenreID] as INT) as GenreID,
+                    g.[Name] as GenreName,
+                    i.[Quantity] as StockQuantity,
+                    i.[ProductName] as InventoryName
+                FROM [Products] p
+                JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                LEFT JOIN [Inventory] i ON p.[ProductID] = i.[ProductID]
+                WHERE p.[GenreID] = @genreId
+                ORDER BY p.[Name]`,
+                [{ name: 'genreId', type: sql.Numeric(9), value: genreId }]
+            );
             
             console.log('Query result:', result.recordset);
             return result.recordset;
@@ -62,40 +59,59 @@ const productQueries = {
         }
     },
 
-    getInventoryOverview: async (pool) => {
+    getInventoryOverview: async () => {
         try {
-            const result = await pool.request()
-                .query(`
-                    SELECT 
-                        i.[InventoryID],
-                        i.[ProductID],
-                        i.[ProductName],
-                        i.[Quantity],
-                        p.[Name] as OriginalProductName,
-                        p.[Description],
-                        p.[Price],
-                        g.[Name] as GenreName
-                    FROM [Inventory] i
-                    LEFT JOIN [Products] p ON i.[ProductID] = p.[ProductID]
-                    LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
-                    ORDER BY g.[Name], p.[Name]
-                `);
+            // Get main inventory
+            const inventoryResult = await executeQuery(`
+                SELECT 
+                    i.[InventoryID],
+                    i.[ProductID],
+                    i.[ProductName],
+                    i.[Quantity] as InventoryQuantity,
+                    p.[Name] as OriginalProductName,
+                    p.[Description],
+                    p.[Price],
+                    g.[Name] as GenreName
+                FROM [Inventory] i
+                LEFT JOIN [Products] p ON i.[ProductID] = p.[ProductID]
+                LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                ORDER BY g.[Name], p.[Name]
+            `);
+
+            // Get overstock
+            const overstockResult = await executeQuery(`
+                SELECT 
+                    o.[OverstockID],
+                    o.[ProductID],
+                    o.[Quantity] as OverstockQuantity,
+                    o.[TransferSortingKey],
+                    p.[Name] as ProductName,
+                    p.[Description],
+                    p.[Price],
+                    g.[Name] as GenreName,
+                    s.[City] as StoreCity,
+                    s.[StreetAddress] as StoreStreetAddress
+                FROM [Overstock] o
+                LEFT JOIN [Products] p ON o.[ProductID] = p.[ProductID]
+                LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
+                LEFT JOIN [Stores] s ON o.[StoreID] = s.[StoreID]
+                ORDER BY g.[Name], p.[Name]
+            `);
             
             // Get summary statistics
-            const stats = await pool.request()
-                .query(`
-                    SELECT 
-                        COUNT(DISTINCT i.[ProductID]) as UniqueProducts,
-                        SUM(i.[Quantity]) as TotalItems,
-                        COUNT(DISTINCT g.[GenreID]) as GenreCount
-                    FROM [Inventory] i
-                    LEFT JOIN [Products] p ON i.[ProductID] = p.[ProductID]
-                    LEFT JOIN [Genres] g ON p.[GenreID] = g.[GenreID]
-                `);
+            const statsResult = await executeQuery(`
+                SELECT 
+                    (SELECT COUNT(DISTINCT ProductID) FROM Inventory) as UniqueInventoryProducts,
+                    (SELECT SUM(Quantity) FROM Inventory) as TotalInventory,
+                    (SELECT COUNT(DISTINCT ProductID) FROM Overstock) as UniqueOverstockProducts,
+                    (SELECT SUM(Quantity) FROM Overstock) as TotalOverstock,
+                    (SELECT COUNT(DISTINCT GenreID) FROM Genres) as GenreCount
+            `);
 
             return {
-                inventory: result.recordset,
-                stats: stats.recordset[0]
+                inventory: inventoryResult.recordset,
+                overstock: overstockResult.recordset,
+                stats: statsResult.recordset[0]
             };
         } catch (error) {
             console.error('Database error in getInventoryOverview:', error);
@@ -106,14 +122,9 @@ const productQueries = {
 
 // Get all genres
 router.get('/genres', async (req, res) => {
-    let pool;
     try {
-        console.log('Connecting to database...');
-        pool = await sql.connect(dbConfig);
-        console.log('Connected to database');
-        
         console.log('Fetching genres...');
-        const genres = await productQueries.getAllGenres(pool);
+        const genres = await productQueries.getAllGenres();
         console.log('Fetched genres:', genres);
         
         res.json(genres);
@@ -130,39 +141,25 @@ router.get('/genres', async (req, res) => {
             error: error.message,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-                console.log('Database connection closed');
-            } catch (err) {
-                console.error('Error closing database connection:', err);
-            }
-        }
     }
 });
 
-// Add debug route
+// Debug route
 router.get('/debug/genres', async (req, res) => {
-    let pool;
     try {
-        pool = await sql.connect(dbConfig);
-        
         // Check if table exists
-        const tableCheck = await pool.request()
-            .query(`
-                SELECT * 
-                FROM INFORMATION_SCHEMA.TABLES 
-                WHERE TABLE_NAME = 'Genres'
-            `);
+        const tableCheck = await executeQuery(`
+            SELECT * 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_NAME = 'Genres'
+        `);
 
         // Get table structure
-        const columnCheck = await pool.request()
-            .query(`
-                SELECT COLUMN_NAME, DATA_TYPE 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = 'Genres'
-            `);
+        const columnCheck = await executeQuery(`
+            SELECT COLUMN_NAME, DATA_TYPE 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_NAME = 'Genres'
+        `);
 
         res.json({
             tableExists: tableCheck.recordset.length > 0,
@@ -175,26 +172,16 @@ router.get('/debug/genres', async (req, res) => {
             error: error.message,
             stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-            } catch (err) {
-                console.error('Error closing connection:', err);
-            }
-        }
     }
 });
 
 // Get products by genre
 router.get('/by-genre/:genreId', async (req, res) => {
-    let pool;
     try {
         const { genreId } = req.params;
         console.log('Fetching products for genre:', genreId);
         
-        pool = await sql.connect(dbConfig);
-        const products = await productQueries.getProductsByGenre(pool, genreId);
+        const products = await productQueries.getProductsByGenre(genreId);
         
         console.log('Successfully fetched products:', products);
         res.json(products);
@@ -211,37 +198,17 @@ router.get('/by-genre/:genreId', async (req, res) => {
             error: error.message,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-                console.log('Database connection closed');
-            } catch (err) {
-                console.error('Error closing database connection:', err);
-            }
-        }
     }
 });
 
-// Add this new route
+// Inventory route is already using executeQuery, no changes needed
 router.get('/inventory', async (req, res) => {
-    let pool;
     try {
-        pool = await sql.connect(dbConfig);
-        const data = await productQueries.getInventoryOverview(pool);
+        const data = await productQueries.getInventoryOverview();
         res.json(data);
     } catch (error) {
         console.error('Error fetching inventory:', error);
         res.status(500).json({ message: 'Failed to fetch inventory' });
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-            } catch (err) {
-                console.error('Error closing database connection:', err);
-            }
-        }
     }
 });
-
-export default router; 
+export default router;

@@ -1,39 +1,32 @@
 import express from 'express';
 import sql from 'mssql';
-import { dbConfig } from '../config/database.js';
+import { executeQuery } from '../utils/db.js';
 
 const router = express.Router();
 
 // Login route
 router.post('/login', async (req, res) => {
-    let pool = null;
     try {
         const { email, password } = req.body;
         console.log('Employee login attempt for:', email);
         
-        // Create a new pool
-        pool = await new sql.ConnectionPool(dbConfig).connect();
-        console.log('Connected to database');
-        
-        // Check if the employee exists
-        const result = await pool.request()
-            .input('email', sql.VarChar, email)
-            .input('password', sql.VarChar, password)
-            .query(`
-                SELECT 
-                    EmployeeID, 
-                    EmailAddress,
-                    FirstName,
-                    LastName,
-                    IsAdmin,
-                    IsStoreOwner,
-                    StoreID
-                FROM Employees 
-                WHERE EmailAddress = @email
-                AND Password = @password
-            `);
-        
-        console.log('Query result:', result.recordset);
+        const result = await executeQuery(
+            `SELECT 
+                EmployeeID, 
+                EmailAddress,
+                FirstName,
+                LastName,
+                IsAdmin,
+                IsStoreOwner,
+                StoreID
+            FROM Employees 
+            WHERE EmailAddress = @email
+            AND Password = @password`,
+            [
+                { name: 'email', type: sql.VarChar, value: email },
+                { name: 'password', type: sql.VarChar, value: password }
+            ]
+        );
 
         if (!result.recordset || result.recordset.length === 0) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -62,45 +55,30 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Employee login error:', error);
         res.status(500).json({ message: 'Login failed', error: error.message });
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-                console.log('Database connection closed');
-            } catch (err) {
-                console.error('Error closing database connection:', err);
-            }
-        }
     }
 });
 
 // Get current employee
 router.get('/current', async (req, res) => {
-    let pool = null;
     try {
         const employeeId = req.session?.employeeId;
         if (!employeeId) {
             return res.status(401).json({ message: 'Not logged in' });
         }
 
-        // Create a new pool
-        pool = await new sql.ConnectionPool(dbConfig).connect();
-        console.log('Connected to database');
-
-        const result = await pool.request()
-            .input('employeeId', sql.Int, employeeId)
-            .query(`
-                SELECT 
-                    e.EmployeeID,
-                    e.EmailAddress,
-                    e.FirstName,
-                    e.LastName,
-                    e.IsAdmin,
-                    e.IsStoreOwner,
-                    e.StoreID
-                FROM Employees e
-                WHERE e.EmployeeID = @employeeId
-            `);
+        const result = await executeQuery(
+            `SELECT 
+                e.EmployeeID,
+                e.EmailAddress,
+                e.FirstName,
+                e.LastName,
+                e.IsAdmin,
+                e.IsStoreOwner,
+                e.StoreID
+            FROM Employees e
+            WHERE e.EmployeeID = @employeeId`,
+            [{ name: 'employeeId', type: sql.Int, value: employeeId }]
+        );
 
         if (result.recordset.length === 0) {
             return res.status(404).json({ message: 'Employee not found' });
@@ -110,15 +88,6 @@ router.get('/current', async (req, res) => {
     } catch (error) {
         console.error('Error fetching employee:', error);
         res.status(500).json({ message: 'Failed to fetch employee details' });
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-                console.log('Database connection closed');
-            } catch (err) {
-                console.error('Error closing database connection:', err);
-            }
-        }
     }
 });
 
