@@ -57,7 +57,39 @@ title: Inventory Management - Nerdblock
       </div>
     </section>
 
-    <!-- Add this section after the "Current Inventory" section -->
+    <!-- Add this section after the "Current Inventory" section and before the "Add New Inventory" section -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8 text-center">Overstock Items</h2>
+      <div class="bg-gray-700 rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-gray-800">
+              <tr>
+                <th class="px-6 py-4">Product Name</th>
+                <th class="px-6 py-4">Genre</th>
+                <th class="px-6 py-4">Store Location</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Quantity</th>
+                <th class="px-6 py-4">Transfer Key</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="overstockList">
+              <!-- Overstock items will be populated by JavaScript -->
+              <tr>
+                <td colspan="7" class="px-6 py-4 text-center">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-600 rounded w-3/4 mx-auto"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add this section after the "Overstock Items" section -->
     <section class="mb-16">
       <h2 class="text-3xl font-bold mb-8 text-center">Add New Inventory</h2>
       <div class="bg-gray-700 rounded-2xl shadow-lg p-8">
@@ -193,6 +225,12 @@ async function loadInventory() {
             </div>
 
             <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-4xl font-bold text-yellow-500 mb-2">${data.stats.TotalOverstock || 0}</div>
+                <h3 class="text-xl font-semibold mb-2">Overstock Items</h3>
+                <p class="text-gray-300">Items in overstock</p>
+            </div>
+
+            <div class="bg-gray-700 rounded-2xl shadow-lg p-6 text-center">
                 <div class="text-4xl font-bold text-blue-500 mb-2">${data.stats.GenreCount}</div>
                 <h3 class="text-xl font-semibold mb-2">Categories</h3>
                 <p class="text-gray-300">Product categories</p>
@@ -250,6 +288,38 @@ async function loadInventory() {
                 </td>
             </tr>
         `).join('');
+
+        // Update overstock list
+        const overstockList = document.getElementById('overstockList');
+        overstockList.innerHTML = data.overstock.map(item => `
+            <tr class="border-t border-gray-600 hover:bg-gray-600">
+                <td class="px-6 py-4">
+                    ${item.ProductName}
+                </td>
+                <td class="px-6 py-4">${item.GenreName || 'Uncategorized'}</td>
+                <td class="px-6 py-4">${item.StoreCity} - ${item.StoreStreetAddress}</td>
+                <td class="px-6 py-4">$${item.Price ? item.Price.toFixed(2) : '0.00'}</td>
+                <td class="px-6 py-4">${item.OverstockQuantity}</td>
+                <td class="px-6 py-4">${item.TransferSortingKey}</td>
+                <td class="px-6 py-4">
+                    <button 
+                        onclick="deleteOverstockItem(${item.OverstockID})"
+                        class="text-red-400 hover:text-red-300 focus:outline-none"
+                        title="Delete item">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('') || `
+            <tr>
+                <td colspan="7" class="px-6 py-4 text-center text-gray-400">
+                    No overstock items found
+                </td>
+            </tr>
+        `;
     } catch (error) {
         console.error('Error loading inventory:', error);
         alert('Failed to load inventory data. Please try again later.');
@@ -348,6 +418,22 @@ document.getElementById('transferForm').addEventListener('submit', async (e) => 
         alert(error.message || 'Failed to transfer inventory. Please try again.');
     }
 });
+
+// Add delete overstock function
+window.deleteOverstockItem = async function(overstockId) {
+    if (!confirm('Are you sure you want to delete this overstock item?')) {
+        return;
+    }
+
+    try {
+        await queryApi.deleteOverstockItem(overstockId);
+        // Refresh the inventory display
+        await loadInventory();
+    } catch (error) {
+        console.error('Error deleting overstock item:', error);
+        alert('Failed to delete overstock item. Please try again.');
+    }
+};
 
 // Load data when the page loads
 document.addEventListener('DOMContentLoaded', () => {

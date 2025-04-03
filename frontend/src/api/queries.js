@@ -406,5 +406,16 @@ export const queryApi = {
             throw new Error(error.message || 'Failed to transfer inventory');
         }
         return response.json();
+    },
+
+    deleteOverstockItem: async (overstockId) => {
+        const response = await fetch(`${API_BASE_URL}/products/overstock/${overstockId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to delete overstock item');
+        }
+        return response.json();
     }
 }; 

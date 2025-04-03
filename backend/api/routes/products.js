@@ -205,6 +205,11 @@ const productQueries = {
                 `DELETE FROM [Inventory] WHERE ProductID = @productId`,
                 [{ name: 'productId', type: sql.Int, value: productId }]
             );
+
+            await executeQuery(
+                `DELETE FROM [Overstock] WHERE ProductID = @productId`,
+                [{ name: 'productId', type: sql.Int, value: productId }]
+            );
             
             // Then delete the product
             const result = await executeQuery(
@@ -328,6 +333,61 @@ const productQueries = {
             return result.recordset;
         } catch (error) {
             console.error('Database error in getAllStores:', error);
+            throw error;
+        }
+    },
+
+    deleteOverstockItem: async (overstockId) => {
+        const pool = await getConnection();
+        const transaction = new sql.Transaction(pool);
+
+        try {
+            await transaction.begin();
+            const request = new sql.Request(transaction);
+
+            // Get the transfer sorting key first
+            const keyResult = await request
+                .input('overstockId', sql.Int, overstockId)
+                .query(`
+                    SELECT TransferSortingKey 
+                    FROM [Overstock] 
+                    WHERE OverstockID = @overstockId
+                `);
+
+            if (keyResult.recordset.length > 0) {
+                const transferKey = keyResult.recordset[0].TransferSortingKey;
+
+                // Delete both records in a single transaction
+                await request
+                    .input('transferKey', sql.Numeric(9), transferKey)
+                    .query(`
+                        BEGIN
+                            DELETE FROM [TransferReport] 
+                            WHERE TransferSortingKey = @transferKey;
+
+                            DELETE FROM [Overstock] 
+                            WHERE OverstockID = @overstockId;
+                        END
+                    `);
+            } else {
+                // If no key found, just delete the overstock record
+                await request.query(`
+                    DELETE FROM [Overstock] 
+                    WHERE OverstockID = @overstockId
+                `);
+            }
+
+            await transaction.commit();
+            return { success: true };
+        } catch (error) {
+            if (transaction) {
+                try {
+                    await transaction.rollback();
+                } catch (rollbackError) {
+                    console.error('Error rolling back transaction:', rollbackError);
+                }
+            }
+            console.error('Database error in deleteOverstockItem:', error);
             throw error;
         }
     }
@@ -499,7 +559,6 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// Add new routes
 router.get('/stores', async (req, res) => {
     try {
         const stores = await productQueries.getAllStores();
@@ -532,6 +591,25 @@ router.post('/inventory/transfer', async (req, res) => {
         res.status(500).json({ 
             message: 'Failed to transfer inventory',
             error: error.message
+        });
+    }
+});
+
+router.delete('/overstock/:id', async (req, res) => {
+    try {
+        const overstockId = parseInt(req.params.id);
+        
+        if (!overstockId) {
+            return res.status(400).json({ message: 'Invalid overstock ID' });
+        }
+
+        await productQueries.deleteOverstockItem(overstockId);
+        res.json({ message: 'Overstock item deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting overstock item:', error);
+        res.status(500).json({ 
+            message: 'Failed to delete overstock item',
+            error: error.message 
         });
     }
 });
