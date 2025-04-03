@@ -65,6 +65,32 @@ const reportQueries = {
             console.error('Error fetching report summary:', error);
             throw error;
         }
+    },
+
+    getSubscriberShippingHistory: async (subscriberId) => {
+        try {
+            console.log('Fetching shipping history for subscriber:', subscriberId);
+            const result = await executeQuery(`
+                SELECT 
+                    sr.ShippingID,
+                    sr.Date as ShippingDate,
+                    sr.ShippingDuration,
+                    t.BoxSortingKey,
+                    t.TotalPrice,
+                    t.Date as TransactionDate
+                FROM ShippingReport sr
+                JOIN Transactions t ON sr.TransactionID = t.TransactionID
+                WHERE sr.SubscriberID = @subscriberId
+                ORDER BY sr.Date DESC
+            `, [
+                { name: 'subscriberId', type: sql.Numeric(9), value: subscriberId }
+            ]);
+
+            return result.recordset;
+        } catch (error) {
+            console.error('Database error in getSubscriberShippingHistory:', error);
+            throw error;
+        }
     }
 };
 
@@ -92,6 +118,30 @@ router.get('/summary', async (req, res) => {
         res.json(summary);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch report summary' });
+    }
+});
+
+router.get('/subscriber/shipping', async (req, res) => {
+    try {
+        console.log('Session data:', req.session);
+        
+        // Updated session check to match auth.js
+        if (!req.session || !req.session.subscriberId) {
+            console.log('No subscriber session found');
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
+
+        const subscriberId = req.session.subscriberId;  // Updated to match the session structure
+        console.log('Fetching shipping history for subscriber ID:', subscriberId);
+
+        const shippingHistory = await reportQueries.getSubscriberShippingHistory(subscriberId);
+        res.json(shippingHistory);
+    } catch (error) {
+        console.error('Error fetching subscriber shipping history:', error);
+        res.status(500).json({ 
+            message: 'Failed to fetch shipping history',
+            error: error.message 
+        });
     }
 });
 

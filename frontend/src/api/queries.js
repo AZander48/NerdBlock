@@ -417,5 +417,34 @@ export const queryApi = {
             throw new Error('Failed to delete overstock item');
         }
         return response.json();
+    },
+
+    getSubscriberShippingHistory: async () => {
+        try {
+            // First check if user is logged in
+            const currentSubscriber = await queryApi.getCurrentSubscriber();
+            if (!currentSubscriber) {
+                window.location.href = '/subscriberLogin';
+                return null;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/reports/subscriber/shipping`, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to fetch shipping history');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error in getSubscriberShippingHistory:', error);
+            throw error;
+        }
     }
 }; 
